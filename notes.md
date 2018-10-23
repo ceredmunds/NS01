@@ -12,7 +12,7 @@ Looking to see whether one vs. two options is a source of value*attention intera
 
 ## Binary options with choice vs preference difference ratings
 - Within-subjects, counterbalanced
-- Initial value rating phase (seems sensible--necessary?)
+- Initial value rating phase
 - Both blocks need to be chosen using mouse, either
     1. Choice: left vs. right
     2. Preference: rating scale
