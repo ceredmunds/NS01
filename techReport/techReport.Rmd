@@ -1,0 +1,45 @@
+---
+title: "NS01: Binary choice vs. evaluation"
+output: html_notebook
+author: "C E R Edmunds"
+date: 5-11-2018
+---
+
+```{r Setup, include=FALSE}
+
+```
+
+# Introduction
+
+## Rationale
+
+# Method
+
+```{r Preprocessing, include=FALSE}
+
+```
+
+## Participants
+```{r Descriptive statistics, include=FALSE}
+
+```
+
+## Design
+
+## Materials
+
+## Procedure
+
+## Analysis
+
+# Results
+## Exclusion criteria
+```{r Data cleaning, include=FALSE}
+
+```
+
+## Analysis
+```{r Analysis}
+
+```
+
