@@ -22,7 +22,14 @@ NS01ratings <- data.table(IAPS = as.integer(femaleRatings$IAPS),
                           fValue = femaleRatings$valmn,
                           mValue = maleRatings$valmn,
                           aValue = allRatings$valmn)
-NS01ratings <- NS01ratings[!IAPS %in% c(3005, 2745, 2055, 2375),]
+
+picturesMissing <- c(3005, 2745, 2055, 2375)
+pornographic <- c(4698, 4693, 4677, 4672, 4666, 4650, 4604)
+aspectRatioWrong <- c(1121, 1313, 1661, 2320, 2381, 2385, 2394, 2485, 2487, 2495, 2499, 2518, 2580,
+                      2600, 4601, 4605, 4606, 4609, 7236, 7249, 7281, 7283, 7284, 7285, 7289, 7402,
+                      7481, 7504, 8220, 8241, 8178, 8050)
+
+NS01ratings <- NS01ratings[!IAPS %in% c(picturesMissing, pornographic, aspectRatioWrong),]
 
 # Subset to get the items we want (i.e. within (minValue, maxValue), and with less than 1.5 diff
 # between genders
