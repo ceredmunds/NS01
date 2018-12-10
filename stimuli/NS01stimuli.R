@@ -15,13 +15,14 @@ maxValue <- 7
 minValue <- 5
 halfRange <- (maxValue-minValue)/2
 midPoint <- halfRange + minValue
-nPpts <- 8
+nPpts <- 80
 nTrials <- 100
 
 NS01ratings <- data.table(IAPS = as.integer(femaleRatings$IAPS),
                           fValue = femaleRatings$valmn,
                           mValue = maleRatings$valmn,
                           aValue = allRatings$valmn)
+NS01ratings <- NS01ratings[!IAPS %in% c(3005, 2745, 2055, 2375),]
 
 # Subset to get the items we want (i.e. within (minValue, maxValue), and with less than 1.5 diff
 # between genders
@@ -41,6 +42,7 @@ NS01choices <- data.table(ParticipantNo = rep(1:nPpts, each=nTrials),
                           rChoice = 0L,
                           rValue = 0)
 
+# Generate choices
 for(iPpt in 1:nPpts){
   itemSample <- sample(1:nrow(NS01ratings), 2*nTrials, replace=F)
   NS01choices[ParticipantNo==iPpt, c("lChoice", "lValue", "rChoice", "rValue") :=
@@ -50,3 +52,10 @@ for(iPpt in 1:nPpts){
                   NS01ratings$aValue[itemSample[(nTrials+1):(2*nTrials)]])]
 }
 
+# Saving choices
+fwrite(NS01choices, "NS01choices.csv")
+fwrite(NS01choices, "../experimentCode/Data/NS01choices.csv")
+
+filenames <- paste("IAPSpictures/",unique(c(NS01choices$lChoice, NS01choices$rChoice)), ".jpg",
+                   sep="")
+file.copy(filenames, "../experimentCode/Stimuli")
