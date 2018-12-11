@@ -133,17 +133,17 @@ try
     data.task(251:300) = repmat(descriptives.blockOrder(2), 50, 1);
     
     HideCursor;
-%     openingPageInstructions = [
-%        'Thank you for taking part in the experiment\n\n\n'...
-%         'Please wait until the experimenter signals the start of the experiment\n\n\n'...
-%         'Do not press any keys in the meantime\n\n\n'...
-%         'After receiving the signal from the experimenter,\n\n'...
-%         'please press the space bar to continue'];
-% 
-%     % Draw welcome page
-%     DrawFormattedText(params.window, openingPageInstructions, 'center', 'center');
-%     Screen('Flip', params.window);
-%     KbStrokeWait;
+    openingPageInstructions = [
+       'Thank you for taking part in the experiment\n\n\n'...
+        'Please wait until the experimenter signals the start of the experiment\n\n\n'...
+        'Do not press any keys in the meantime\n\n\n'...
+        'After receiving the signal from the experimenter,\n\n'...
+        'please press the space bar to continue'];
+
+    % Draw welcome page
+    DrawFormattedText(params.window, openingPageInstructions, 'center', 'center');
+    Screen('Flip', params.window);
+    KbStrokeWait;
     params.task = 'likert';
     row = 0;
     for iTrials = 1:2

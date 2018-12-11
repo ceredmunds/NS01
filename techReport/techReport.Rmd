@@ -54,7 +54,7 @@ We will run testing until either a) we collect the data of 50 participants after
 ## Other. Anything else you would like to pre-register? 
 
 ## Title.
-Response modes in choice. 
+Response modes in binary choice. 
 
 # Method
 
@@ -79,9 +79,9 @@ The stimuli were chosen from the International Affective Picture System [@Lang:2
 
 ## Procedure
 
-At the beginning of the experiment, participants judged how much they liked each picture on a vertical Likert scale (1=strongly dislike, 7=strongly like).
+The experiment was displayed on a black background with white text and response scales. After being introduced to the experiment and providing information about their age and gender, participants judged how much they liked each picture on a vertical Likert scale (1=strongly dislike, 7=strongly like). Each of the 200 stimuli were displayed once in a random order. Participants were offered the chance to take a self-paced break every 50 stimuli. A blank, black screen was displayed for 500ms between each rating. 
 
-The experiment was displayed on a black background with white text and response scales. On each choice trial, two landscape stimuli (each 514 x 384px) were displayed side by side. Below both stimuli, a response scale was presented. For the binary block, this consisted of a line with two options at either end: Option A or Option B. There was a red, square marker (30x30px) that could appear at either end of the scale and was controlled by the mouse. For the continuous rating task, the response scale was similar to that in the binary task. However, the labels differed. From left to right, these were "Strongly prefer", "Weakly prefer", "No prefernce", "Weakly prefer" and "Strongly prefer". Only the options "Strongly prefer" and "No preference" had tick marks associated with them. Responses were again indicated by a red square. However, in this task participants could move the square to any point along the line using the mouse. To respond, the participants had to press the left mouse button. Reaction times were measured from the start of the trial to the beginning of the mouse click (i.e. the program did not wait for the release of the mouse button). A blank, black screen was displayed for 1000ms between each trial. 
+Following the rating task, the eye-tracker was calibrated. <!-- Details?--> In following two tasks, the eye-tracker was recalibrated every 13 trials (i.e. between trials 12-13, 25-26, and 38-39). At the beginning of each choice trial, a fixation cross was displayed until the participant had stared at it for at least 300ms. In both tasks, after the fixation cross two landscape stimuli (each 514 x 384px) were displayed side by side. The response scale was presented horizontally centered, below the stimuli. For the binary task, this consisted of a line with two options at either end: Option A or Option B. There was a red, square marker (30px by 30px) that could only appear at either end of the scale and was controlled by the mouse. For the continuous rating task, the response scale was similar to that in the binary task. However, the labels differed. From left to right, these were "Strongly prefer", "Weakly prefer", "No preference", "Weakly prefer" and "Strongly prefer". Only the options "Strongly prefer" and "No preference" had tick marks associated with them. Responses were again indicated by a red square. However, in this task participants could move the square to any point along the line using the mouse. To respond, the participants had to press the left mouse button. Reaction times were measured from the start of the trial to the beginning of the mouse click (i.e. the program did not wait for the release of the mouse button). A blank, black screen was displayed for 500ms between each trial. 
 
 ## Analysis
 
