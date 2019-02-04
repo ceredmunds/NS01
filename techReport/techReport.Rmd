@@ -22,7 +22,9 @@ For submission to aspredicted.org
 No, no data have been collected for this study yet. 
 
 ## Hypothesis. What's the main question being asked or hypothesis being tested in this study?
-Is there an attention*value interaction when participants have to evaluate the differences between two options?
+We are interested in the effects of attention (as measured by time spent looking at an object using eye-tracking) and value (as elicited from the subjects directly via ratings) when determining choices between two objects (such as between two bags of chips, or two pictures of nature, or between two fruits). In previous experiments, we have found that choice is predicted by an interaction of attention and value: people attend to objects they like more and are more likely to choose them. However, in other experiments there are only additively separable effects of attention and value on choice: people are more likely to pick the option they value more and/or they are more likely to choose the option they attend to more, but that these effects do not interact (i.e. looking more does not have a bigger effect when the value difference is bigger). 
+ 
+The current experiment will attempt to identify which properties lead to the interactive vs. additive effect of attention and value. Here, we will compare simple binary choice between two pictures (Would you prefer Picture A or Picture B on your wall?) with a strength of preference comparison (By how much would you prefer Picture A over Picture B, or vice versa?). We hypothesise that the size of the interaction term will be greater in the strength-of-preference condition than in the choice condition. 
 
 ## Dependent variable. Describe the key dependent variable(s) specifying how they will be measured.
 The dependent variables will be the choice that each participant makes on each trial, the proportion of time spent looking at each option on each trial and the number of fixations of each option on each trial. 
@@ -52,9 +54,10 @@ Trials for which the reaction time was shorter than 200ms and above the particip
 We will run testing until either a) we collect the data of 50 participants after exclusions, or b) we attempt data collection from 80 participants; whichever comes first. 
 
 ## Other. Anything else you would like to pre-register? 
+We will collect age, and gender for all participants. We will not report the summary statistics of these variables, nor include them as covariates in our regression analyses, unless requested by referees during the publication process.
 
 ## Title.
-Response modes in binary choice. 
+Strength-of-preference vs. decisions in binary choice
 
 # Method
 
@@ -81,9 +84,10 @@ The stimuli were chosen from the International Affective Picture System [@Lang:2
 
 The experiment was displayed on a black background with white text and response scales. After being introduced to the experiment and providing information about their age and gender, participants judged how much they liked each picture on a vertical Likert scale (1=strongly dislike, 7=strongly like). Each of the 200 stimuli were displayed once in a random order. Participants were offered the chance to take a self-paced break every 50 stimuli. A blank, black screen was displayed for 500ms between each rating. 
 
-Following the rating task, the eye-tracker was calibrated. <!-- Details?--> In following two tasks, the eye-tracker was recalibrated every 13 trials (i.e. between trials 12-13, 25-26, and 38-39). At the beginning of each choice trial, a fixation cross was displayed until the participant had stared at it for at least 300ms. In both tasks, after the fixation cross two landscape stimuli (each 514 x 384px) were displayed side by side. The response scale was presented horizontally centered, below the stimuli. For the binary task, this consisted of a line with two options at either end: Option A or Option B. There was a red, square marker (30px by 30px) that could only appear at either end of the scale and was controlled by the mouse. For the continuous rating task, the response scale was similar to that in the binary task. However, the labels differed. From left to right, these were "Strongly prefer", "Weakly prefer", "No preference", "Weakly prefer" and "Strongly prefer". Only the options "Strongly prefer" and "No preference" had tick marks associated with them. Responses were again indicated by a red square. However, in this task participants could move the square to any point along the line using the mouse. To respond, the participants had to press the left mouse button. Reaction times were measured from the start of the trial to the beginning of the mouse click (i.e. the program did not wait for the release of the mouse button). A blank, black screen was displayed for 500ms between each trial. 
+Following the rating task, the eye-tracker was calibrated. <!-- Details?--> In following two tasks, the eye-tracker was recalibrated every 13 trials (i.e., before each task and between trials 12-13, 25-26, and 38-39). At the beginning of each choice trial, a fixation cross was displayed until the participant had stared at it for at least 300ms. In both tasks, after the fixation cross two landscape stimuli (each 514 x 384px) were displayed side by side. The response scale was presented horizontally centered, below the stimuli. For the binary choice task, two labels ("Option A" and "Option B") were shown underneath the appropriate stimuli. The current choice was signified by a red, square marker (30 x 30px) above the label. For the strength of preference task, the response scale was a white bar displayed underneath the stimuli that extended from the middle of one stimulus to the middle of the other. A red marker slid along the bar to signify the amount of preference for each option. The end of the scales were marked "Option A" and "Option B." In this task participants could move the square to any point along the line using the mouse. To respond in both tasks, the participants had to press the left mouse button. Reaction times were measured from the start of the trial to the beginning of the mouse click (i.e. the program did not wait for the release of the mouse button). A blank, black screen was displayed for 500ms between each trial.
 
 ## Analysis
+The continuous scale was split into a hundred bins. 
 
 # Results
 ## Exclusion criteria
