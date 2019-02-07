@@ -10,7 +10,7 @@ function fixationCross
     drawFixationCross
     fixstart = GetSecs;
             
-    while ~crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10
+    while crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10
         if Eyelink('NewFloatSampleAvailable') > 0
             % get the sample in the form of an event structure
             evt = Eyelink('NewestFloatSample');
@@ -28,7 +28,6 @@ function fixationCross
     end
     
     Eyelink('Message', 'FIXATION_FOUND');
-
 end
 
 function drawFixationCross

@@ -183,18 +183,41 @@ try
     row = 0;
     getTaskParameters;
     
+    EyelinkDoTrackerSetup(el);
+    
     displayInstructions(par.task);
     Eyelink('Message', 'START_VALUATION_TASK'); % Mark end of valuation task
     WaitSecs(0.05);
     for iTrials = 1:par.nImages
         row = row + 1;
+        
+        Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial
+        Eyelink('command', 'record_status_message "TRIAL %d/%d"', ...
+            row, totalTrials);
+        
+        Eyelink('Command', 'set_idle_mode');
+            WaitSecs(0.05);
+            Eyelink('StartRecording');
+            WaitSecs(0.05);
+            Eyelink('Message', 'TRIALID %d', iTrials);
+            % record a few samples before we actually start displaying
+            % otherwise you may lose a few msec of data
+            WaitSecs(0.1);
+            
+        fixationCross;
+        
         [par.data.xBoxPos(row), par.data.yBoxPos(row), ...
             par.data.response(row), par.data.RT(row)] = ...
             trial(likertStimuli(iTrials,1));
         writetable(par.data, par.behavDataFileName);
         
+         Eyelink('StopRecording'); % Stop recording eye-movements
+        
         if mod(iTrials, 50)==0
             displayInstructions("break");
+        end
+        if any(mod(iTrials)==[12 25 38])
+                EyelinkDoTrackerSetup(el);
         end
     end
     Eyelink('Message', 'END_VALUATION_TASK'); % Mark end of valuation task
@@ -204,7 +227,6 @@ try
     for jBlock = 1:2
         par.task = par.blockNames(jBlock);
         getTaskParameters;
-        displayInstructions(par.task);
          
         if isequal(par.task, "binary")
             Eyelink('Message', 'START_BINARY_TASK')
@@ -214,6 +236,8 @@ try
         
         % Calibrate the eye tracker
         EyelinkDoTrackerSetup(el);
+        
+        displayInstructions(par.task);
         for iTrials = 1:par.nChoices
             row = row + 1;
             Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial
