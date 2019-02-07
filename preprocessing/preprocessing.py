@@ -5,7 +5,7 @@ import csv
 eyeFilename = '../analysis/SampleData/NS01edf1.asc'
 
 # Set up data variables
-participantInfo = [eyeFilename[-5], 'NA', 'NA', 'NA', 'NA', 'NA']
+participantInfo = [eyeFilename[-5], 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA']
 trialData = []
 startTime = None
 
@@ -17,8 +17,8 @@ irrelevant = ['RECCFG', 'ELCLCFG', 'GAZE_COORDS', 'THRESHOLDS', 'ELCL_WINDOW_SIZ
 
 # Set up csv file for saving
 csvFilename = 'NS01ppt1.csv'
-header = [['participantNo', 'trialN', 'response', 'trialStage', 'rt', 'expPhase', 'eye', 'fixStart', 'fixEnd',
-           'fixLength', 'fixPosX', 'fixPosY', 'dilation']]
+header = [['participantNo', 'expPhase', 'trialN', 'response', 'trialStage', 'trialStartTime', 'trialFinishTime', 'rt',
+           'eye', 'fixStart', 'fixEnd', 'fixLength', 'fixPosX', 'fixPosY', 'dilation']]
 
 with open(csvFilename, 'w') as csvFile:
     writer = csv.writer(csvFile)
@@ -32,15 +32,23 @@ with open(eyeFilename, 'r') as f:
 
         if line[:5] == 'START':
             trialData = []
-            participantInfo[2] = 'NA'
-            participantInfo[3] = 'fixationCross'
-            participantInfo[4] = 'NA'
+            participantInfo[3] = 'NA'
+            participantInfo[4] = 'fixationCross'
+            participantInfo[5] = 'NA'
+            participantInfo[6] = 'NA'
+            participantInfo[7] = 'NA'
             continue
 
         if line[:3] == 'END':
             for l in trialData:
-                l[2] = response
-                l[4] = rt
+                l[3] = response
+                l[5] = startTime
+                l[6] = responseTime
+
+                if isinstance(startTime, float):
+                    l[7] = responseTime - startTime
+                else:
+                    l[7] = 'NA'
 
             with open(csvFilename, 'a') as csvFile:
                 writer = csv.writer(csvFile)
@@ -62,15 +70,15 @@ with open(eyeFilename, 'r') as f:
 
             # Get trial stage
             if 'START_VALUATION_TASK' in line:
-                participantInfo[5] = 'valuation'
+                participantInfo[1] = 'valuation'
                 continue
 
             if 'START_BINARY_TASK' in line:
-                participantInfo[5] = 'binary'
+                participantInfo[1] = 'binary'
                 continue
 
             if 'START_CONTINUOUS_TASK' in line:
-                participantInfo[5] = 'continuous'
+                participantInfo[1] = 'continuous'
                 continue
 
             # Things that do require line editing
@@ -78,24 +86,22 @@ with open(eyeFilename, 'r') as f:
             line = line.split()
 
             if 'TrialN' in line:
-                participantInfo[1] = line[-1]
+                participantInfo[2] = line[-1]
                 continue
 
             if 'TRIAL_START' in line:
-                participantInfo[3] = 'trial'
+                participantInfo[4] = 'trial'
                 startTime = float(line[1])
                 continue
 
             if 'TRIAL_RESULT' in line:
                 response = line[-1]
-                if participantInfo[5] != 'valuation':
-                    participantInfo[3] = 'postResponse'
-                    participantInfo[4] = 'NA'
+                if participantInfo[1] != 'valuation':
+                    participantInfo[4] = 'postResponse'
+                    participantInfo[5] = 'NA'
                 continue
 
             if 'RESPONSE_MADE' in line:
-                if isinstance(startTime, float):
-                    rt = float(line[1])-startTime
-                else:
-                    rt = 'NA'
+                responseTime = float(line[1])
+
 
