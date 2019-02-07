@@ -7,7 +7,7 @@ function fixationCross
         crossfixated = false;
     end
     
-    drawFixationCross
+    drawFixationCross;
     fixstart = GetSecs;
             
     while ~crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10

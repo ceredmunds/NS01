@@ -13,7 +13,7 @@ try
     global par
     
     % Development parameters
-    test = false;
+    test = true;
     if test
         par.nChoices = 2; % Number of choices per task
         par.nImages = 4; 
@@ -183,15 +183,34 @@ try
     row = 0;
     getTaskParameters;
     
+    % Calibrate the eye tracker
+    EyelinkDoTrackerSetup(el);
+    
     displayInstructions(par.task);
     Eyelink('Message', 'START_VALUATION_TASK'); % Mark end of valuation task
     WaitSecs(0.05);
     for iTrials = 1:par.nImages
+        Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial
+        Eyelink('command', 'record_status_message "TRIAL %d/%d"', ...
+            row, totalTrials);
+
+        Eyelink('Command', 'set_idle_mode');
+        WaitSecs(0.05);
+        Eyelink('StartRecording');
+        WaitSecs(0.05);
+        Eyelink('Message', 'TRIALID %d', iTrials);
+        % record a few samples before we actually start displaying
+        % otherwise you may lose a few msec of data
+        WaitSecs(0.1);
+        
         row = row + 1;
+        fixationCross;
         [par.data.xBoxPos(row), par.data.yBoxPos(row), ...
             par.data.response(row), par.data.RT(row)] = ...
             trial(likertStimuli(iTrials,1));
         writetable(par.data, par.behavDataFileName);
+        
+        Eyelink('StopRecording'); % Stop recording eye-movements
         
         if mod(iTrials, 50)==0
             displayInstructions("break");

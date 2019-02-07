@@ -18,7 +18,12 @@ irrelevant = ['RECCFG', 'ELCLCFG', 'GAZE_COORDS', 'THRESHOLDS', 'ELCL_WINDOW_SIZ
 # Set up csv file for saving
 csvFilename = 'NS01ppt1.csv'
 header = [['participantNo', 'expPhase', 'trialN', 'response', 'trialStage', 'trialStartTime', 'trialFinishTime', 'rt',
-           'eye', 'fixStart', 'fixEnd', 'fixLength', 'fixPosX', 'fixPosY', 'dilation']]
+           'eye', 'fixStart', 'fixEnd', 'fixLength', 'fixPosX', 'fixPosY', 'dilation',
+           'aoi']]
+
+stimulusBoundaries = {"vertical" : [1080/2-192, 1080/2+192],
+                      "left" : [1920/4-257, 1920/4+257],
+                      "right" : [1920*0.75-257, 1920*0.75+257]}
 
 with open(csvFilename, 'w') as csvFile:
     writer = csv.writer(csvFile)
@@ -32,6 +37,7 @@ with open(eyeFilename, 'r') as f:
 
         if line[:5] == 'START':
             trialData = []
+            aoi = ["NA"]
             participantInfo[3] = 'NA'
             participantInfo[4] = 'fixationCross'
             participantInfo[5] = 'NA'
@@ -60,7 +66,16 @@ with open(eyeFilename, 'r') as f:
             line = line.strip()
             line = line.split()
 
-            trialData.append(participantInfo+line[1:])
+            if stimulusBoundaries['vertical'][0] < float(line[5]) < stimulusBoundaries['vertical'][1]:
+                if stimulusBoundaries["left"][0] < float(line[4]) < stimulusBoundaries["left"][1]:
+                    aoi = ['left']
+                elif stimulusBoundaries["right"][0] < float(line[4]) < stimulusBoundaries["right"][1]:
+                    aoi = ['right']
+                else:
+                    aoi = ['NA']
+
+            trialData.append(participantInfo + line[1:] + aoi)
+
             continue
 
         if line[:3] == 'MSG':
