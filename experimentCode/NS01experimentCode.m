@@ -17,6 +17,7 @@ try
     if test
         par.nChoices = 2; % Number of choices per task
         par.nImages = 4; 
+        Screen('Preference', 'SkipSyncTests', 1);
     else
         par.nChoices = 50;
         par.nImages = 200;
@@ -69,7 +70,7 @@ try
         repmat(int8(descriptives.pptNo), totalTrials, 1),...
         repmat(int8(descriptives.age), totalTrials, 1),...
         repmat(descriptives.gender, totalTrials, 1),...
-        [repmat("likert", 200, 1); repmat("experiment", 100, 1)],...
+        [repmat("likert", 300, 1)],...
         [ones(200, 1); repmat(2, 50, 1); repmat(3, 50, 1)],...
         [(1:200)'; (1:50)'; (1:50)'],...
         [repmat("NA", 200, 1); string(choices(:, 2))],...
@@ -85,8 +86,8 @@ try
     if mod(par.pptNo, 2)
         par.blockNames = flipud(par.blockNames);
     end
-    par.data.task(201:250) = repmat(string(par.blockNames(1)), 50, 1);
-    par.data.task(251:300) = repmat(string(par.blockNames(2)), 50, 1);
+    par.data.task(1:50) = repmat(string(par.blockNames(1)), 50, 1);
+    par.data.task(51:100) = repmat(string(par.blockNames(2)), 50, 1);
 
     writetable(par.data, par.behavDataFileName);
     
@@ -178,9 +179,53 @@ try
     displayInstructions("welcome");
 
     %% Start experimemt
-    % Value task
-    par.task = "likert";
     row = 0;
+    for jBlock = 1:2
+        par.task = par.blockNames(jBlock);
+        getTaskParameters;
+         
+        if isequal(par.task, "binary")
+            Eyelink('Message', 'START_BINARY_TASK')
+        elseif isequal(par.task, "continuous")
+            Eyelink('Message', 'START_CONTINUOUS_TASK')
+        end
+        
+        % Calibrate the eye tracker
+        EyelinkDoTrackerSetup(el);
+        
+        displayInstructions(par.task);
+        for iTrials = 1:par.nChoices
+            row = row + 1;
+            Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial
+            Eyelink('command', 'record_status_message "TRIAL %d/%d"', ...
+                row, totalTrials);
+            
+            Eyelink('Command', 'set_idle_mode');
+            WaitSecs(0.05);
+            Eyelink('StartRecording');
+            WaitSecs(0.05);
+            Eyelink('Message', 'TRIALID %d', iTrials);
+            % record a few samples before we actually start displaying
+            % otherwise you may lose a few msec of data
+            WaitSecs(0.1);
+            
+            fixationCross;
+            [par.data.xBoxPos(row), par.data.yBoxPos(row), ...
+                par.data.response(row), par.data.RT(row)] = ...
+                trial(stimuli((jBlock-1)*par.nChoices + iTrials, :));
+            writetable(par.data, par.behavDataFileName);
+            Eyelink('StopRecording'); % Stop recording eye-movements
+            
+            if any(iTrials==[25])
+                EyelinkDoTrackerSetup(el);
+            end
+        end
+        row = 50;
+    end
+    
+        % Value task
+    par.task = "likert";
+    row = 100;
     getTaskParameters;
     
     EyelinkDoTrackerSetup(el);
@@ -224,50 +269,6 @@ try
     end
     Eyelink('Message', 'END_VALUATION_TASK'); % Mark end of valuation task
     WaitSecs(0.05);
-         
-    row = 200;
-    for jBlock = 1:2
-        par.task = par.blockNames(jBlock);
-        getTaskParameters;
-         
-        if isequal(par.task, "binary")
-            Eyelink('Message', 'START_BINARY_TASK')
-        elseif isequal(par.task, "continuous")
-            Eyelink('Message', 'START_CONTINUOUS_TASK')
-        end
-        
-        % Calibrate the eye tracker
-        EyelinkDoTrackerSetup(el);
-        
-        displayInstructions(par.task);
-        for iTrials = 1:par.nChoices
-            row = row + 1;
-            Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial
-            Eyelink('command', 'record_status_message "TRIAL %d/%d"', ...
-                row, totalTrials);
-            
-            Eyelink('Command', 'set_idle_mode');
-            WaitSecs(0.05);
-            Eyelink('StartRecording');
-            WaitSecs(0.05);
-            Eyelink('Message', 'TRIALID %d', iTrials);
-            % record a few samples before we actually start displaying
-            % otherwise you may lose a few msec of data
-            WaitSecs(0.1);
-            
-            fixationCross;
-            [par.data.xBoxPos(row), par.data.yBoxPos(row), ...
-                par.data.response(row), par.data.RT(row)] = ...
-                trial(stimuli((jBlock-1)*par.nChoices + iTrials, :));
-            writetable(par.data, par.behavDataFileName);
-            Eyelink('StopRecording'); % Stop recording eye-movements
-            
-            if any(iTrials==[12 25 38])
-                EyelinkDoTrackerSetup(el);
-            end
-        end
-        row = 250;
-    end
     
     displayInstructions("goodbye")
     

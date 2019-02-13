@@ -9,22 +9,25 @@ function displayInstructions(expPhase)
     elseif  isequal(expPhase, "likert")
         instructions = ['In the first part of the experiment,\n\n\n'...
         'you will be asked to rate how much you like a series of pictures.\n\n\n'...
-        'Please respond using the mouse button.'];
+        'Please respond using the mouse and left mouse button.'];
+        pressKeyContinue
     elseif isequal(expPhase, "binary")
         instructions = ['In this part of the experiment,\n\n\n'...
         'you will be asked to chose which picture you prefer.\n\n\n'...
-        'Please respond using the mouse button.\n\n\n'...
+        'Please respond using the mouse and left mouse button.\n\n\n'...
         'Note that the trial will not start until you look at the fixation cross.'];
+        pressKeyContinue
     elseif isequal(expPhase, "continuous")
         instructions = ['In this part of the experiment,\n\n\n'...
         'you will be asked to rate by how much you prefer each picture.\n\n\n'...
-        'Please respond using the mouse button.\n\n\n'...
+        'Please respond using the mouse amd left mouse button.\n\n\n'...
         'Note that the trial will not start until you look at the fixation cross.'];
+        pressKeyContinue
     elseif isequal(expPhase, "break")
-        instructions = ['Please take a break, if you"d like.\n\n\n'...
-            'Press any key to continue when you"re ready.'];
+        instructions = "Please take a break, if you'd like.\n\n\n";
+        pressKeyContinue
     elseif isequal(expPhase, "goodbye")
-        instructions = ['Thank you for taking part in the experiment.'];
+        instructions = 'Thank you for taking part in the experiment.';
     end
     
     displaySingleInstruction(instructions);
@@ -39,10 +42,10 @@ function displaySingleInstruction(text)
     KbStrokeWait;
 end
 
-function pressSpace
+function pressKeyContinue
     global par
 
-    pressSpaceText = ['Please press the space bar to continue'];
+    pressSpaceText = 'Please press any key to continue';
     DrawFormattedText(par.window, pressSpaceText, ...
         'center', 0.8*par.winRect(4));
 end
