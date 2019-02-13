@@ -12,15 +12,17 @@ function [xBoxPos, yBoxPos, response, RT] = trial(stimuli)
     rightImageTexture = Screen('MakeTexture', par.window, rightImage);
     
     % Get mouse position
+    SetMouse(par.screenCenter(1), par.screenCenter(2));
     [xMousePos, yMousePos, ~] = GetMouse(par.window);
     buttons = [0 0 0];
+    response = NaN;
     
-    drawScale
-    drawStimuli(leftImageTexture, rightImageTexture)
+    drawScale;
+    drawStimuli(leftImageTexture, rightImageTexture);
     startTime = Screen('Flip', par.window);
     Eyelink('Message', 'TRIAL_START')
     
-    while ~buttons(1)
+    while ~all([buttons(1)~=0 ~isnan(response)])
        % Draw scale
         drawStimuli(leftImageTexture, rightImageTexture);
         drawScale;
@@ -100,8 +102,13 @@ function [xBoxPos, yBoxPos, response] = drawScaleMarker(mousePos)
     global par
      % Move rectangle
     if isequal(par.task, "binary")
-        [~, response] = min(abs(par.scale.xPos - mousePos(1)));
-        xBoxPos = par.scale.xPos(response);
+        if mousePos(1)==par.screenCenter(1)
+            xBoxPos = par.screenCenter(1);
+            response = NaN;
+        else
+            [~, response] = min(abs(par.scale.xPos - mousePos(1)));
+            xBoxPos = par.scale.xPos(response);
+        end
         yBoxPos = par.scale.yPos;
     elseif isequal(par.task, "continuous")
         if mousePos(1) > par.scale.xPos(1) && mousePos(1) < par.scale.xPos(2)
