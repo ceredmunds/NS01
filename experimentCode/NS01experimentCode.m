@@ -17,7 +17,6 @@ try
     if test
         par.nChoices = 2; % Number of choices per task
         par.nImages = 4; 
-        Screen('Preference', 'SkipSyncTests', 1);
     else
         par.nChoices = 50;
         par.nImages = 200;
@@ -190,10 +189,10 @@ try
             Eyelink('Message', 'START_CONTINUOUS_TASK')
         end
         
-        % Calibrate the eye tracker
-        EyelinkDoTrackerSetup(el);
+        displayInstructions(par.task, false);
+        EyelinkDoTrackerSetup(el); % Calibrate the eye tracker
+        displayInstructions(par.task, true);
         
-        displayInstructions(par.task);
         for iTrials = 1:par.nChoices
             row = row + 1;
             Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial
@@ -228,13 +227,19 @@ try
     row = 100;
     getTaskParameters;
     
-    EyelinkDoTrackerSetup(el);
-    
-    displayInstructions(par.task);
     Eyelink('Message', 'START_VALUATION_TASK'); % Mark end of valuation task
     WaitSecs(0.05);
+    
+    displayInstructions(par.task, false);
+    EyelinkDoTrackerSetup(el); % Calibrate the eye tracker
+    displayInstructions(par.task, true);
+    
     for iTrials = 1:par.nImages
         row = row + 1;
+        
+        if any(mod(iTrials, 50)==[1 26]) && iTrials>1
+            EyelinkDoTrackerSetup(el);
+        end
         
         Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial
         Eyelink('command', 'record_status_message "TRIAL %d/%d"', ...
@@ -258,13 +263,8 @@ try
          
         Eyelink('StopRecording'); % Stop recording eye-movements
 
-        
         if mod(iTrials, 50)==0
             displayInstructions("break");
-        end
-         
-        if any(mod(iTrials)==[12 25 38])
-                EyelinkDoTrackerSetup(el);
         end
     end
     Eyelink('Message', 'END_VALUATION_TASK'); % Mark end of valuation task
