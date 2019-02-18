@@ -5,7 +5,7 @@ clear all;
 addpath('functions', 'stimuli', 'data')
 PsychDefaultSetup(1);
 
-cleanUp;
+%cleanUp;
 commandwindow;
 
 try
@@ -17,14 +17,13 @@ try
     if test
         par.nChoices = 2; % Number of choices per task
         par.nImages = 4; 
-        Screen('Preference', 'SkipSyncTests', 1);
     else
         par.nChoices = 50;
         par.nImages = 200;
     end
        
     % Eye-tracking
-    par.dummymode = 0;       % set to 1 to initialize in dummymode
+    par.dummymode = 1;       % set to 1 to initialize in dummymode
     par.nBadCalib = 0;
     
     % Fixation cross

@@ -96,6 +96,18 @@ The continuous scale was split into a hundred bins.
 ```
 
 ## Analysis
+[NS: Can we add a R-code like model specification:
+
+For within-subjects analysis:
+glmer(choice ~ value.difference * attention.difference * condition + (1 | value.difference * attention.difference * condition || subject), family=binomial)
+
+For first block only between-subjects analysis
+
+glmer(choice ~ value.difference * attention.difference * condition + (1 | value.difference * attention.difference || subject), family=binomial)
+
+
+
+
 ```{r Analysis}
 
 ```
