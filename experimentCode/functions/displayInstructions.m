@@ -17,7 +17,7 @@ function displayInstructions(expPhase, reminder)
         'Remember, you will be asked to rate how much you like a series of pictures.\n\n\n'...
         'Please respond using the mouse and left mouse button.\n\n\n'...
         'The more you like the picture, the higher the marker should be on the screen.'];
-        pressKeyContinue
+        clickToContinue
     elseif isequal(expPhase, "binary") && reminder==false
         instructions = ['In this part of the experiment,\n\n\n'...
         'you will be asked to chose which picture you prefer.\n\n\n'...
@@ -29,7 +29,7 @@ function displayInstructions(expPhase, reminder)
         'Remember, you will be asked to chose which picture you prefer.\n\n\n'...
         'Please respond by moving the red marker under the picture you prefer and press left mouse button.\n\n\n'...
         'Note that the trial will not start until you look at the fixation cross.'];
-        pressKeyContinue
+        clickToContinue
     elseif isequal(expPhase, "continuous") && reminder==false
         instructions = ['In this part of the experiment,\n\n\n'...
         'you will be asked to rate by how much you prefer each picture.\n\n\n'...
@@ -44,30 +44,45 @@ function displayInstructions(expPhase, reminder)
         'Please respond using the mouse and left mouse button.\n\n\n'...
         'The slider indicates how much you prefer one picture compared to the other.\n\n\n'...
         'E.g., Far left=strongly prefer left; slightly right=slightly prefer right.\n\n\n'];
-        pressKeyContinue
+        clickToContinue
     elseif isequal(expPhase, "break")
-        instructions = "Please take a break, if you'd like.\n\n\n";
-        pressKeyContinue
+        instructions = 'Please take a break if you like.\n\n\n';
+        clickToContinue
     elseif isequal(expPhase, "goodbye")
         instructions = 'Thank you for taking part in the experiment.';
     end
     
-    displaySingleInstruction(instructions);
+    displaySingleInstruction(instructions, reminder);
 end
 
-function displaySingleInstruction(text)
+function displaySingleInstruction(text, reminder)
     global par
     
     DrawFormattedText(par.window, text, 'center', 'center');
     Screen('Flip', par.window);
     WaitSecs(0.5);
-    KbStrokeWait;
+    if reminder
+        [x,y,buttons] = GetMouse;
+        while ~any(buttons) % wait for press
+            [x,y,buttons] = GetMouse;
+        end
+    else
+        KbStrokeWait;
+    end
 end
 
 function pressKeyContinue
     global par
 
     pressSpaceText = 'Please press any key to continue';
+    DrawFormattedText(par.window, pressSpaceText, ...
+        'center', 0.8*par.windowRect(4));
+end
+
+function clickToContinue
+    global par
+
+    pressSpaceText = 'Please click anywhere to continue';
     DrawFormattedText(par.window, pressSpaceText, ...
         'center', 0.8*par.windowRect(4));
 end

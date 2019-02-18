@@ -9,7 +9,7 @@ cleanUp;
 commandwindow;
 
 try
-    %% Get global parameters
+    %% Get global parameters 
     global par
     
     % Development parameters
@@ -171,11 +171,11 @@ try
     end
     
     % Open file to record data to
-    edfFileTemp='temp.edf';
+    edfFileTemp=['A' num2str(par.pptNo) '.edf'];
     Eyelink('Openfile', edfFileTemp);
     
     %% Instructions
-    displayInstructions("welcome");
+    displayInstructions("welcome", false);
 
     %% Start experimemt
     row = 0;
@@ -263,14 +263,14 @@ try
          
         Eyelink('StopRecording'); % Stop recording eye-movements
 
-        if mod(iTrials, 50)==0
-            displayInstructions("break");
+        if mod(iTrials, 50)==0 && iTrials<200
+            displayInstructions("break", true);
         end
     end
     Eyelink('Message', 'END_VALUATION_TASK'); % Mark end of valuation task
     WaitSecs(0.05);
     
-    displayInstructions("goodbye")
+    displayInstructions("goodbye", false)
     
     %% Close down
     Eyelink('CloseFile'); % Close data file
