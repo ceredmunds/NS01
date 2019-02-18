@@ -12,15 +12,17 @@ function [xBoxPos, yBoxPos, response, RT] = trial(stimuli)
     rightImageTexture = Screen('MakeTexture', par.window, rightImage);
     
     % Get mouse position
+    SetMouse(par.screenCenter(1), par.screenCenter(2));
     [xMousePos, yMousePos, ~] = GetMouse(par.window);
     buttons = [0 0 0];
+    response = NaN;
     
-    drawScale
-    drawStimuli(leftImageTexture, rightImageTexture)
+    drawScale;
+    drawStimuli(leftImageTexture, rightImageTexture);
     startTime = Screen('Flip', par.window);
     Eyelink('Message', 'TRIAL_START')
     
-    while ~buttons(1)
+    while ~all([buttons(1)~=0 ~isnan(response)])
        % Draw scale
         drawStimuli(leftImageTexture, rightImageTexture);
         drawScale;
@@ -51,10 +53,6 @@ function drawScale
         horizontalScale = CenterRectOnPoint(par.scale.contiuousScaleRect, ...
             par.screenCenter(1), par.scale.yPos);
         Screen('FillRect', par.window, [255 255 255], horizontalScale);
-        
-%         Screen('DrawLines', par.window, par.scale.lineCoords, ...
-%             40, [255 255 255], ...
-%             [par.screenCenter(1) par.scale.yPos], 2);
     elseif isequal(par.scale.orientation, "vertical")
         Screen('DrawLines', par.window, par.scale.lineCoords, ...
             par.lineWidthPx, [255 255 255], ...
@@ -87,9 +85,6 @@ function drawScaleLabels
             0.5*par.screenCenter(1)-40, par.scale.yPos+50);
         DrawFormattedText(par.window, 'Prefer B', ...
             1.5*par.screenCenter(1)-40, par.scale.yPos+50); 
-%         DrawFormattedText(par. window, 'Weakly prefer', 0.75*par.screenCenter(1) - 75, par.scale.yPos+40);
-%         DrawFormattedText(par. window, 'Weakly prefer', 1.25*par.screenCenter(1) -50, par.scale.yPos+40);
-%         DrawFormattedText(par.window, 'No preference', par.screenCenter(1)-65 , par.scale.yPos+40);
     elseif isequal(par.task, "binary")
         DrawFormattedText(par.window, 'Option A', 0.5*par.screenCenter(1)-60, par.scale.yPos+50);
         DrawFormattedText(par.window, 'Option B', 1.5*par.screenCenter(1)-60, par.scale.yPos+50); 
@@ -100,8 +95,19 @@ function [xBoxPos, yBoxPos, response] = drawScaleMarker(mousePos)
     global par
      % Move rectangle
     if isequal(par.task, "binary")
-        [~, response] = min(abs(par.scale.xPos - mousePos(1)));
-        xBoxPos = par.scale.xPos(response);
+        if mousePos(1)==par.screenCenter(1)
+            xBoxPos = par.screenCenter(1);
+            response = NaN;
+        else
+            [~, response] = min(abs(par.scale.xPos - mousePos(1)));
+            xBoxPos = par.scale.xPos(response);
+            
+            if mousePos(1) < par.scale.xPos(1) 
+                mousePos(1) = par.scale.xPos(1);
+            elseif mousePos(1) > par.scale.xPos(2)
+                mousePos(1) = par.scale.xPos(2);
+            end
+        end
         yBoxPos = par.scale.yPos;
     elseif isequal(par.task, "continuous")
         if mousePos(1) > par.scale.xPos(1) && mousePos(1) < par.scale.xPos(2)
@@ -109,6 +115,12 @@ function [xBoxPos, yBoxPos, response] = drawScaleMarker(mousePos)
         else
             [~, response] = min(abs(par.scale.xPos - mousePos(1)));
             xBoxPos = par.scale.xPos(response);
+            
+            if mousePos(1) < par.scale.xPos(1) 
+                mousePos(1) = par.scale.xPos(1);
+            elseif mousePos(1) > par.scale.xPos(2)
+                mousePos(1) = par.scale.xPos(2);
+            end
         end
         yBoxPos = par.scale.yPos;
         [~, response] = min(abs(par.scale.continuousPos - mousePos(1)));
@@ -118,9 +130,10 @@ function [xBoxPos, yBoxPos, response] = drawScaleMarker(mousePos)
         yBoxPos = par.scale.yPos(response);
         response = 8 - response;
     end 
+    SetMouse(mousePos(1), mousePos(2))
+
     
     centeredRect = CenterRectOnPoint(par.scale.baseRect, xBoxPos, yBoxPos);
-    
     Screen('FillRect', par.window, [255 0 0], centeredRect);
 end % drawScaleMarker
 
