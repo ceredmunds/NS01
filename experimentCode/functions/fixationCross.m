@@ -9,17 +9,23 @@ function fixationCross
     
     drawFixationCross;
     fixstart = GetSecs;
+    lengthFixation = 0;
             
-    while crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10
+    while ~crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10
         if Eyelink('NewFloatSampleAvailable') > 0
             % get the sample in the form of an event structure
             evt = Eyelink('NewestFloatSample');
 
             if sqrt((par.screenCenter(1)-evt.gx(1)).^2 + ...
                  (par.screenCenter(2)-evt.gy(1)).^2) < 100
-                %targetfixpos(i,:) = [evt.gx(1), evt.gy(1)];
-                crossfixated = true;
+                WaitSecs(0.05);
+                lengthFixation = lengthFixation + 0.05;
+            else
+                lengthFixation = 0;
             end
+        end
+        if lengthFixation >= 0.15
+            crossfixated = true;
         end
     end
     
