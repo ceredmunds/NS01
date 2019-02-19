@@ -270,7 +270,7 @@ try
     Eyelink('Message', 'END_VALUATION_TASK'); % Mark end of valuation task
     WaitSecs(0.05);
     
-    displayInstructions("goodbye", false)
+    displayInstructions("goodbye", false);
     
     %% Close down
     Eyelink('CloseFile'); % Close data file

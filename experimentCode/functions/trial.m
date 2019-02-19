@@ -20,7 +20,7 @@ function [xBoxPos, yBoxPos, response, RT] = trial(stimuli)
     drawScale;
     drawStimuli(leftImageTexture, rightImageTexture);
     startTime = Screen('Flip', par.window);
-    Eyelink('Message', 'TRIAL_START')
+    Eyelink('Message', 'TRIAL_START');
     
     while ~all([buttons(1)~=0 ~isnan(response)])
        % Draw scale
