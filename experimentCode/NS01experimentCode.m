@@ -23,7 +23,7 @@ try
     end
        
     % Eye-tracking
-    par.dummymode = 1;       % set to 1 to initialize in dummymode
+    par.dummymode = 0;       % set to 1 to initialize in dummymode
     par.nBadCalib = 0;
     
     % Fixation cross

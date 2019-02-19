@@ -9,7 +9,6 @@ function fixationCross
     
     drawFixationCross;
     fixstart = GetSecs;
-    lengthFixation = 0;
             
     while ~crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10
         if Eyelink('NewFloatSampleAvailable') > 0
@@ -18,14 +17,8 @@ function fixationCross
 
             if sqrt((par.screenCenter(1)-evt.gx(1)).^2 + ...
                  (par.screenCenter(2)-evt.gy(1)).^2) < 100
-                WaitSecs(0.05);
-                lengthFixation = lengthFixation + 0.05;
-            else
-                lengthFixation = 0;
+                crossfixated = true;
             end
-        end
-        if lengthFixation >= 0.15
-            crossfixated = true;
         end
     end
     
