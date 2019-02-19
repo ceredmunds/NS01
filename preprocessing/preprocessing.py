@@ -2,7 +2,7 @@ import numpy as np
 import csv
 
 # Read in file
-eyeFilename = '../analysis/SampleData/NS01edf1.asc'
+eyeFilename = '../data/NS01edf2.asc'
 
 # Set up data variables
 participantInfo = [eyeFilename[-5], 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA']
@@ -16,14 +16,16 @@ irrelevant = ['RECCFG', 'ELCLCFG', 'GAZE_COORDS', 'THRESHOLDS', 'ELCL_WINDOW_SIZ
               'CALIBRATION', '!CAL', 'PRESCALER', 'PUPIL', 'GAZE']
 
 # Set up csv file for saving
-csvFilename = 'NS01ppt1.csv'
+csvFilename = '../data/fixations/NS01longFixations' + eyeFilename[-5] + '.csv'
 header = [['participantNo', 'expPhase', 'trialN', 'response', 'trialStage', 'trialStartTime', 'trialFinishTime', 'rt',
            'eye', 'fixStart', 'fixEnd', 'fixLength', 'fixPosX', 'fixPosY', 'dilation',
            'aoi']]
 
-stimulusBoundaries = {"vertical" : [1080/2-192, 1080/2+192],
-                      "left" : [1920/4-257, 1920/4+257],
-                      "right" : [1920*0.75-257, 1920*0.75+257]}
+aoiBoundaries = {"vertical": [1080/2-192, 1080/2+192],
+                 "left": [1920/4-257, 1920/4+257],
+                 "right": [1920*0.75-257, 1920*0.75+257],
+                 "likertX": [1920*0.2, 1920*0.8],
+                 "likertY": [1080*0.2, 1080*0.8]}
 
 with open(csvFilename, 'w') as csvFile:
     writer = csv.writer(csvFile)
@@ -66,13 +68,21 @@ with open(eyeFilename, 'r') as f:
             line = line.strip()
             line = line.split()
 
-            if stimulusBoundaries['vertical'][0] < float(line[5]) < stimulusBoundaries['vertical'][1]:
-                if stimulusBoundaries["left"][0] < float(line[4]) < stimulusBoundaries["left"][1]:
-                    aoi = ['left']
-                elif stimulusBoundaries["right"][0] < float(line[4]) < stimulusBoundaries["right"][1]:
+            aoi = ['NA']
+
+            if aoiBoundaries["right"][0] < float(line[5]) < aoiBoundaries["right"][1]:
+                if aoiBoundaries['vertical'][0] < float(line[6]) < aoiBoundaries['vertical'][1]:
                     aoi = ['right']
-                else:
-                    aoi = ['NA']
+            elif aoiBoundaries["left"][0] < float(line[5]) < aoiBoundaries["left"][1]:
+                if any([participantInfo[1] == 'continuous', participantInfo[1] == 'binary']):
+                    if aoiBoundaries['vertical'][0] < float(line[6]) < aoiBoundaries['vertical'][1]:
+                         aoi = ['left']
+                elif participantInfo[1] == 'valuation':
+                    if aoiBoundaries['likertY'][0] < float(line[6]) < aoiBoundaries['likertY'][1]:
+                        aoi = ['likertVertical']
+            elif aoiBoundaries['vertical'][1] < float(line[6]):
+                if aoiBoundaries["likertX"][0] < float(line[5]) < aoiBoundaries["likertX"][1]:
+                    aoi = ["likertHorizontal"]
 
             trialData.append(participantInfo + line[1:] + aoi)
 
@@ -84,16 +94,16 @@ with open(eyeFilename, 'r') as f:
                 continue
 
             # Get trial stage
-            if 'START_VALUATION_TASK' in line:
-                participantInfo[1] = 'valuation'
-                continue
-
             if 'START_BINARY_TASK' in line:
                 participantInfo[1] = 'binary'
                 continue
 
             if 'START_CONTINUOUS_TASK' in line:
                 participantInfo[1] = 'continuous'
+                continue
+
+            if 'START_VALUATION_TASK' in line:
+                participantInfo[1] = 'valuation'
                 continue
 
             # Things that do require line editing
