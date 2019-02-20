@@ -5,9 +5,10 @@ import csv
 eyeFilename = '../data/NS01edf2.asc'
 
 # Set up data variables
-participantInfo = [eyeFilename[-5], 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA']
+participantInfo = [eyeFilename[-5], 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA']
 trialData = []
 startTime = None
+block = 0
 
 # Lists of string in relevant and irrelevant lines
 relevant = ['MSG', 'EFIX', 'START', 'END']
@@ -17,7 +18,7 @@ irrelevant = ['RECCFG', 'ELCLCFG', 'GAZE_COORDS', 'THRESHOLDS', 'ELCL_WINDOW_SIZ
 
 # Set up csv file for saving
 csvFilename = '../data/fixations/NS01longFixations' + eyeFilename[-5] + '.csv'
-header = [['participantNo', 'expPhase', 'trialN', 'response', 'trialStage', 'trialStartTime', 'trialFinishTime', 'rt',
+header = [['participantNo', 'block', 'expPhase', 'trialN', 'response', 'trialStage', 'trialStartTime', 'trialFinishTime', 'rt',
            'eye', 'fixStart', 'fixEnd', 'fixLength', 'fixPosX', 'fixPosY', 'dilation',
            'aoi']]
 
@@ -40,23 +41,23 @@ with open(eyeFilename, 'r') as f:
         if line[:5] == 'START':
             trialData = []
             aoi = ["NA"]
-            participantInfo[3] = 'NA'
-            participantInfo[4] = 'fixationCross'
-            participantInfo[5] = 'NA'
+            participantInfo[4] = 'NA'
+            participantInfo[5] = 'fixationCross'
             participantInfo[6] = 'NA'
             participantInfo[7] = 'NA'
+            participantInfo[8] = 'NA'
             continue
 
         if line[:3] == 'END':
             for l in trialData:
-                l[3] = response
-                l[5] = startTime
-                l[6] = responseTime
+                l[4] = response
+                l[6] = startTime
+                l[7] = responseTime
 
                 if isinstance(startTime, float):
-                    l[7] = responseTime - startTime
+                    l[8] = responseTime - startTime
                 else:
-                    l[7] = 'NA'
+                    l[8] = 'NA'
 
             with open(csvFilename, 'a') as csvFile:
                 writer = csv.writer(csvFile)
@@ -74,10 +75,10 @@ with open(eyeFilename, 'r') as f:
                 if aoiBoundaries['vertical'][0] < float(line[6]) < aoiBoundaries['vertical'][1]:
                     aoi = ['right']
             elif aoiBoundaries["left"][0] < float(line[5]) < aoiBoundaries["left"][1]:
-                if any([participantInfo[1] == 'continuous', participantInfo[1] == 'binary']):
+                if any([participantInfo[2] == 'continuous', participantInfo[2] == 'binary']):
                     if aoiBoundaries['vertical'][0] < float(line[6]) < aoiBoundaries['vertical'][1]:
                          aoi = ['left']
-                elif participantInfo[1] == 'valuation':
+                elif participantInfo[2] == 'valuation':
                     if aoiBoundaries['likertY'][0] < float(line[6]) < aoiBoundaries['likertY'][1]:
                         aoi = ['likertVertical']
             elif aoiBoundaries['vertical'][1] < float(line[6]):
@@ -95,15 +96,21 @@ with open(eyeFilename, 'r') as f:
 
             # Get trial stage
             if 'START_BINARY_TASK' in line:
-                participantInfo[1] = 'binary'
+                block = block + 1
+                participantInfo[1] = str(block)
+                participantInfo[2] = 'binary'
                 continue
 
             if 'START_CONTINUOUS_TASK' in line:
-                participantInfo[1] = 'continuous'
+                block = block + 1
+                participantInfo[1] = str(block)
+                participantInfo[2] = 'continuous'
                 continue
 
             if 'START_VALUATION_TASK' in line:
-                participantInfo[1] = 'valuation'
+                block = block + 1
+                participantInfo[1] = str(block)
+                participantInfo[2] = 'valuation'
                 continue
 
             # Things that do require line editing
@@ -111,19 +118,19 @@ with open(eyeFilename, 'r') as f:
             line = line.split()
 
             if 'TrialN' in line:
-                participantInfo[2] = line[-1]
+                participantInfo[3] = line[-1]
                 continue
 
             if 'TRIAL_START' in line:
-                participantInfo[4] = 'trial'
+                participantInfo[5] = 'trial'
                 startTime = float(line[1])
                 continue
 
             if 'TRIAL_RESULT' in line:
                 response = line[-1]
                 if participantInfo[1] != 'valuation':
-                    participantInfo[4] = 'postResponse'
-                    participantInfo[5] = 'NA'
+                    participantInfo[5] = 'postResponse'
+                    participantInfo[6] = 'NA'
                 continue
 
             if 'RESPONSE_MADE' in line:
