@@ -1,0 +1,72 @@
+---
+title: "NS01: Binary choice vs. strength-of-preference"
+output: html_notebook
+author: "C E R Edmunds"
+date: 20-02-2019
+---
+
+```{r Setup, message=F}
+rm(list=ls()) 
+
+require(data.table); require(plyr)
+
+data <- fread('/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv')
+
+effedUp <- c(1)
+badCalib <- c(6, 9)
+```
+
+# Get summary statistics
+```{r}
+N <- length(unique(data$participantNo))
+```
+
+# Exclusions
+We excluded all participants who were outliers in the time spend on and off task. 
+```{r}
+binary <- data[task=='binary' & intra_choice==1,]
+binary[, onTask:= ifelse(aoi=="left" | aoi=="right", 1, 0)]
+
+
+continuous <- data[task=='continuous' & intra_choice==1,]
+
+
+```
+
+
+We excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all trials.
+```{r}
+# Excluding trials based on reaction times
+data[, excludeTrial:= ifelse(rt<200 | rt>mean(rt)+3*sd(rt), 1, 0)]
+data[, exclude:= excludeTrial/.N, by=list(participantNo, trial)]
+
+# Summary of exclusions by reaction time
+exclusions <- aggregate(data$exclude, list(data$participantNo), sum)
+colnames(exclusions) <- c("participantNo", "nExclusions")
+exclusions["percentExcluded"] <- (exclusions$nExclusions/300)*100
+percentTrialsExcluded <- mean(exclusions$percentExcluded)
+
+# Remove those trials
+data <- data[exclude==0,]
+```
+
+# Manipulation checks
+```{r}
+contData <- data[task=="continuous",]
+
+hist(contData$response, breaks=1:100)
+
+```
+
+# Order effects
+```{r}
+
+```
+
+
+
+# Analysis
+
+```{r}
+
+```
