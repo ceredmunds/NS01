@@ -13,7 +13,7 @@ require(data.table); require(plyr)
 data <- fread('/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv', stringsAsFactors=F)
 
 effedUp <- c(1)
-badCalib <- c(6, 9)
+badCalib <- c(6, 9, 10, 14, 15)
 ```
 
 # Get summary statistics
