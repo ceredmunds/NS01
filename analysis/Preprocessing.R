@@ -18,16 +18,27 @@ files <- lapply(filenames, fread, header = TRUE)
 behavData <- do.call(rbind, files)
 rm(files, filenames)
 
-setnames(behavData, old=c("participantN"), new=c("participantNo"))
-behavData[, c("rowN", "taskOrder", "xBoxPos", "yBoxPos", "response", "RT"):=NULL]
+setnames(behavData, old=c("participantN", "lValue", "rValue"),
+         new=c("participantNo", "lValueIAPS", "rValueIAPS"))
 behavData[task=="likert", task:="valuation"]
+behavData[, c("rowN", "taskOrder", "xBoxPos", "yBoxPos", "response", "RT"):=NULL]
 
 fixations <- merge(data, behavData, by=c("participantNo", "task", "trial"))
+
+valuation <- dcast(fixations[task=="valuation",], participantNo + rImage + response ~.)
+
+fixations <- merge(fixations, valuation[,1:3], by.x=c("participantNo", "lImage"),
+                   by.y=c("participantNo", "rImage"))
+setnames(fixations, old=c("response.x", "response.y"), new=c("response", "lValue"))
+
+fixations <- merge(fixations, valuation[,1:3], by=c("participantNo", "rImage"))
+setnames(fixations, old=c("response.x", "response.y"), new=c("response", "rValue"))
+
 setcolorder(fixations,
             c("DAU", "participantNo", "age", "gender", "eye", "trial", "task", "block", "blockTrial",
-              "trialStartTime", "trialFinishTime", "trialStage", "lImage", "lValue", 'rImage',
-              "rValue", "response", "rt", "fixStart", "fixEnd", "fixLength", "dilation", "fixPosX",
-              "fixPosY", "aoi"))
+              "trialStartTime", "trialFinishTime", "trialStage", "lImage", "lValueIAPS", "lValue",
+              "rImage", "rValueIAPS", "rValue", "response", "rt", "fixStart", "fixEnd", "fixLength",
+              "dilation", "fixPosX", "fixPosY", "aoi"))
 
 # Correct fixation onset and offset times ----------------------------------------------------------
 fixations[, fixStartTr:= ifelse(fixStart<trialStartTime, trialStartTime, fixStart)]
