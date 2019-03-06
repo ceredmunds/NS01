@@ -11,6 +11,7 @@ commandwindow;
 try
     %% Get global parameters 
     global par
+    global el
     
     % Development parameters
     test = false;
@@ -126,7 +127,6 @@ try
     el.calibrationtargetwidth=0.5;
     
     EyelinkUpdateDefaults(el);
-    par.eye_used = eyelink_eye_available();
     
     % Initialise eyetracker, exit if fails
     if ~EyelinkInit(par.dummymode, 1)
@@ -193,6 +193,8 @@ try
         displayInstructions(par.task, false);
         EyelinkDoTrackerSetup(el); % Calibrate the eye tracker
         displayInstructions(par.task, true);
+         
+        par.eye_used = -1
         
         for iTrials = 1:par.nChoices
             row = row + 1;
@@ -218,6 +220,7 @@ try
             
             if any(iTrials==[25])
                 EyelinkDoTrackerSetup(el);
+                par.eye_used = -1
             end
         end
         row = 50;
@@ -234,12 +237,14 @@ try
     displayInstructions(par.task, false);
     EyelinkDoTrackerSetup(el); % Calibrate the eye tracker
     displayInstructions(par.task, true);
+    par.eye_used = -1
     
     for iTrials = 1:par.nImages
         row = row + 1;
         
         if any(mod(iTrials, 50)==[1 26]) && iTrials>1
             EyelinkDoTrackerSetup(el);
+            par.eye_used = -1
         end
         
         Eyelink('Message', 'TrialN %d', iTrials); % Mark start of trial

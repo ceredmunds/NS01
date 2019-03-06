@@ -1,5 +1,6 @@
 function fixationCross
     global par
+    global el
 
     if par.dummymode == 1
         crossfixated = true;
@@ -12,12 +13,21 @@ function fixationCross
     fixstart = GetSecs;
             
     while ~crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10
-        if Eyelink( 'NewFloatSampleAvailable') > 0
+        if Eyelink('NewFloatSampleAvailable') > 0
             % get the sample in the form of an event structure
             evt = Eyelink('NewestFloatSample');
-            
-            x = evt.gx(par.eye_used);
-            y = evt.gx(par.eye_used);
+
+            if par.eye_used ~= -1 % do we know which eye to use yet?
+            % if we do, get current gaze position from sample
+                x = evt.gx(par.eye_used+1); % +1 as we're accessing MATLAB array
+                y = evt.gy(par.eye_used+1);
+            else
+            % if we don't, first find eye that's being tracked
+                par.eye_used = Eyelink('EyeAvailable'); % get eye that's tracked
+                if par.eye_used == el.BINOCULAR; % if both eyes are tracked
+                    par.eye_used = el.LEFT_EYE; % use left eye
+                end
+            end
 
             if sqrt((par.screenCenter(1)-x).^2+(par.screenCenter(2)-y).^2)<100
                 lenFixation = lenFixation + 0.05;
