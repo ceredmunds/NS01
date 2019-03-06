@@ -51,5 +51,8 @@ fixations[, fixDurationProp:=fixDurationTr/rt]
 # Flag fixations during choice
 fixations[, intra_choice:=ifelse(fixDurationTr>0, 1, 0)]
 
+# Tidy aoi
+fixations[aoi=="", aoi:=NA]
+
 # Write data
 fwrite(fixations, "NS01fixationsLong.csv", row.names=F)

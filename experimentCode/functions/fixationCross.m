@@ -14,9 +14,12 @@ function fixationCross
     while ~crossfixated && par.nBadCalib<5 && GetSecs-fixstart<10
         if Eyelink( 'NewFloatSampleAvailable') > 0
             % get the sample in the form of an event structure
-            evt = Eyelink( 'NewestFloatSample');
+            evt = Eyelink('NewestFloatSample');
+            
+            x = evt.gx(par.eye_used);
+            y = evt.gx(par.eye_used);
 
-            if sqrt((par.screenCenter(1)-evt.gx(2)).^2+(par.screenCenter(2)-evt.gy(2)).^2)<100
+            if sqrt((par.screenCenter(1)-x).^2+(par.screenCenter(2)-y).^2)<100
                 lenFixation = lenFixation + 0.05;
                 WaitSecs(0.05);
             end

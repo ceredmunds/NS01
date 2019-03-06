@@ -126,6 +126,7 @@ try
     el.calibrationtargetwidth=0.5;
     
     EyelinkUpdateDefaults(el);
+    par.eye_used = eyelink_eye_available();
     
     % Initialise eyetracker, exit if fails
     if ~EyelinkInit(par.dummymode, 1)
