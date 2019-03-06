@@ -21,6 +21,11 @@ function fixationCross
             % if we do, get current gaze position from sample
                 x = evt.gx(par.eye_used+1); % +1 as we're accessing MATLAB array
                 y = evt.gy(par.eye_used+1);
+
+                if sqrt((par.screenCenter(1)-x).^2+(par.screenCenter(2)-y).^2)<100
+                    lenFixation = lenFixation + 0.05;
+                    WaitSecs(0.05);
+                end
             else
             % if we don't, first find eye that's being tracked
                 par.eye_used = Eyelink('EyeAvailable'); % get eye that's tracked
@@ -29,10 +34,7 @@ function fixationCross
                 end
             end
 
-            if sqrt((par.screenCenter(1)-x).^2+(par.screenCenter(2)-y).^2)<100
-                lenFixation = lenFixation + 0.05;
-                WaitSecs(0.05);
-            end
+
         end
         
         if lenFixation>=0.2
