@@ -1,0 +1,214 @@
+---
+title: 'NS01: Binary choice vs. strength-of-preference'
+author: "C E R Edmunds"
+date: "20-02-2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r Setup, message=F, echo=F, results='hide'}
+rm(list=ls()) 
+
+require(data.table); require(plyr); require(lme4); require(ggplot2)
+
+data <- fread('/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv', stringsAsFactors=F)
+
+effedUp <- c(1)
+badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47)
+
+data <- data[!participantNo %in% badCalib,]
+```
+
+## Summary statistics
+```{r Summary statistics}
+N <- length(unique(data$participantNo))
+```
+
+### Participants
+Currently have `r N` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
+
+## Exclusions
+We excluded all participants who were outliers in the time spent off task.
+```{r Exclusions based on attention: binary task}
+binary <- data[task=='binary' & intra_choice==1,]
+binary[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
+binary[, onTaskTime:= onTask*fixDurationProp]
+binary.summary <- as.data.table(aggregate(onTaskTime ~ participantNo + trial, data=binary, FUN=sum))
+
+binary.boxplot <- ggplot(binary.summary, aes(x=participantNo, y=onTaskTime, group=participantNo)) + 
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title="Time spent on task in binary condition", x="Participant", y="Time on task") + 
+  ylim(c(0, 1))
+binary.boxplot
+
+binary.histogram <- ggplot(binary.summary, aes(x=onTaskTime)) + 
+  geom_histogram(binwidth=0.01) + 
+  theme_minimal() +
+  labs(title="Histogram of time on task for every trial for every participant in binary task", 
+       x="Time on task", y="Count") +
+  xlim(c(0, 1))
+binary.histogram
+
+binary.means <- as.data.table(binary.summary[, mean(onTaskTime, na.rm = TRUE), by=participantNo])
+binaryExclusions <- c(binary.means[V1<0.60, participantNo])
+
+data <- data[!participantNo %in% binaryExclusions,]
+```
+
+
+```{r Exclusions based on attention: continuous task}
+continuous <- data[task=='continuous' & intra_choice==1,]
+continuous[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
+continuous[, onTaskTime:= onTask*fixDurationProp]
+continuous.summary <- as.data.table(aggregate(onTaskTime ~ participantNo + trial, data=continuous, FUN=sum))
+
+continuous.boxplot <- ggplot(continuous.summary, aes(x=participantNo, y=onTaskTime, group=participantNo)) + 
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title="Time spent on task in continuous condition", x="Participant", y="Time on task") + 
+  ylim(c(0, 1))
+continuous.boxplot
+
+continuous.histogram <- ggplot(continuous.summary, aes(x=onTaskTime)) + 
+  geom_histogram(binwidth=0.01) + 
+  theme_minimal() +
+  labs(title="Histogram of time on task for every trial for every participant in continuous task", 
+       x="Time on task", y="Count") +
+  xlim(c(0, 1))
+continuous.histogram
+
+# Get subjective values
+continuous.means <- as.data.table(continuous.summary[, mean(onTaskTime, na.rm = TRUE), by=participantNo])
+contExclusions <- c(continuous.means[V1<0.60, participantNo])
+
+data <- data[!participantNo %in% contExclusions,]
+
+```
+We excluded participants in both conditions that had average on task time of less than 0.60, which resulted in excluding two participants.
+
+We excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all trials.
+```{r Exclusions based on reaction times}
+# Excluding trials based on reaction times
+data[, excludeTrial:= ifelse(rt<200 | rt>mean(rt)+3*sd(rt), 1, 0)]
+data[, exclude:= excludeTrial/.N, by=list(participantNo, trial)]
+
+# Summary of exclusions by reaction time
+exclusions <- aggregate(data$exclude, list(data$participantNo), sum)
+colnames(exclusions) <- c("participantNo", "nExclusions")
+exclusions["percentExcluded"] <- (exclusions$nExclusions/300)*100
+percentTrialsExcluded <- mean(exclusions$percentExcluded)
+
+# Remove those trials
+data <- data[excludeTrial==0,]
+```
+
+<!-- # Manipulation checks -->
+<!-- Looking at responses in the continuous task -->
+<!-- ```{r} -->
+<!-- hist(continuous$response, breaks=1:100) -->
+
+<!-- continuous[, rescaledResponse:= ifelse(response<=50, response, 101-response)] -->
+<!-- continuous.responses <- aggregate(rescaledResponse ~ participantNo + block, data=continuous, FUN=sd) -->
+
+<!-- boxplot(rescaledResponse ~ participantNo, data=continuous) -->
+<!-- boxplot(rescaledResponse ~ participantNo, data=continuous[block==1]) -->
+<!-- boxplot(rescaledResponse ~ participantNo, data=continuous[block==2]) -->
+
+<!-- # Looking to see whether this makes a difference for different blocks -->
+<!-- t.test(rescaledResponse ~ block, data=continuous) -->
+
+<!-- # # Looking at entropy of decisions -->
+<!-- # entropy.table <- dcast(continuous, participantNo + rescaledResponse ~ .,  -->
+<!-- #                        value.var = "rescaledResponse") -->
+<!-- # colnames(entropy.table) <- c("participantNo", "rescaledResponse", "N") -->
+<!-- #  -->
+<!-- # x <- ddply(entropy.table, .(participantNo), summarize,  -->
+<!-- #       entropy = entropy(N, method="Laplace")) -->
+<!-- # barplot(x$entropy) -->
+<!-- ``` -->
+
+## Analysis
+```{r Analysis}
+fixations <- dcast(data, participantNo + task + taskOrder + block + trial + response + rt +
+                     lValue + rValue ~ aoi,
+                   fun = sum, value.var="fixDurationProp")
+fixations[, V1:=NULL]
+
+fixations[, value.difference:=rValue-lValue]
+fixations[, attention.difference:=right-left]
+
+fixations[, response:=as.double(response)]
+fixations[task=="binary", response:= response-1]
+fixations[task=="continuous", response:= (response-1.0)/99.0]
+
+fixations[, recodedResponse:= response]
+fixations[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
+
+order.model <- glmer(recodedResponse ~ taskOrder + (1|participantNo), 
+                     data = fixations[!task=="valuation"], 
+                     family = binomial)
+summary(order.model)
+
+attention.model <- glmer(recodedResponse ~ attention.difference + 
+                           (1 + attention.difference|participantNo), 
+               data = fixations[!task=="valuation"],
+               family = binomial)
+summary(attention.model)
+
+attention.task.model <- glmer(recodedResponse ~ attention.difference*task + 
+                                (1 + attention.difference|participantNo), 
+               data = fixations[!task=="valuation"],
+               family = binomial)
+summary(attention.task.model)
+
+value.model <- glmer(recodedResponse ~ value.difference + 
+                           (1 + value.difference|participantNo), 
+               data = fixations[!task=="valuation"],
+               family = binomial)
+summary(value.model)
+
+value.task.model <- glmer(recodedResponse ~ value.difference*task + 
+                                (1 + value.difference|participantNo), 
+               data = fixations[!task=="valuation"],
+               family = binomial)
+summary(value.task.model)
+
+attention.value.interaction <- glmer(recodedResponse ~ attention.difference*value.difference + 
+                           (1 + value.difference|participantNo), 
+               data = fixations[!task=="valuation"],
+               family = binomial)
+summary(attention.value.interaction)
+
+attention.value.task.interaction <- glmer(recodedResponse ~ attention.difference*value.difference*task + 
+                           (1 + value.difference|participantNo) + (attention.difference-1|participantNo), 
+               data = fixations[!task=="valuation"],
+               family = binomial)
+summary(attention.value.task.interaction)
+
+anova(attention.value.task.interaction, attention.value.interaction)
+
+```
+
+```{r Analysis of continuous responses}
+attention.model <- glmer(response ~ attention.difference + 
+                           (1 + attention.difference|participantNo), 
+               data = fixations[task=="continuous"],
+               family = binomial)
+summary(attention.model)
+
+value.model <- glmer(response ~ value.difference + 
+                           (1 + value.difference|participantNo), 
+               data = fixations[task=="continuous"],
+               family = binomial)
+summary(value.model)
+
+
+attention.value.interaction <- glmer(response ~ attention.difference*value.difference + 
+                           (1 + value.difference|participantNo), 
+               data = fixations[task=="continuous"],
+               family = binomial)
+summary(attention.value.interaction)
+```
+
