@@ -1,0 +1,25 @@
+# Project title
+Comparison vs. decisions in binary choice
+
+# Project type
+Individual decision making
+
+# Project description
+Advances in eye tracking technology mean that it is now possible to measure in real time where an individual is looking on an information display. Decision making researchers have been using this technology to measure what information people pay most attention to whilst weighing up different options and considering which is their favoured alternative. It has been found that individuals’ preferences and choices can be predicted with reasonably high accuracy by measuring how much time they spend looking at and considering different information. It has also been found that individuals tend to choose the option with the highest (subjective or objective) value.
+
+The current research is interested in how individuals' attention and value judgments interact. Some research has found that participants tend to look longer at options they also value. On the other hand, some research has found that attention and value have entirely independent effects on choice. Here, we will look at one possible difference between these two sets of studies. Research that didn't find an attention-value interaction used a simple choice task ("which do you prefer, Film A or Film B?"), whereas research that did find an interaction required participants to make a more comprensive evaluation and comparison of the two options.
+
+We propose an experiment where participants have to complete either a simple choice task between two options, or evaluate how much they prefer one option compared to another on a continuous scale. The stimuli are pictures from the International Affective Picture (IAPS) scale. These are only the positve pictures from the IAPS library, and do not contain any distressing or pornographic images. Attention will be measured as proportion of time spent looking at each object on each trial, as measured using an eye-tracker. The subjective value of each option for each participant will be obtained from a rating task at the beginning of the experiment. All responses will be given using a computer mouse. We predict that there should be an attention-value interaction in the evaluation task, but not in the binary choice task.
+
+Before starting the experiment, all participants will give informed consent: they will be told what to expect during the experiment, how their data will be stored (anonymously for at least 10 years under the University's data management policy), that they can withdraw at any time, and where to go if they have questions or to raise concerns about the contents of the study.
+
+Note that this is a continuation of a previous project by Dr. Tim Mullet that was granted full ethical clearance: Ethical Application Reference: 85/13-14, Info-Ed Reference: 41210.
+
+# Explain how your project satisfies the submission criteria (DR@W)
+It is not a student project and there are no conflicts of interest.  It is a simple choice experiment which is an extension of a previous series of experiments by Tim Mullett.
+
+# Number of participants
+We are planning on collecting data until we have 50 participants after exclusions or 80 participants (whichever comes first). Participant data might be excluded because of failure of eye-tracking calibration, lack of attention or poor responding (continuously pressing the same button or alternating buttons).
+
+# Dates
+1/1/2019 - 1/1/2020
