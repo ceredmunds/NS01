@@ -50,6 +50,7 @@ for file in listdir("../data/"):
                 if line[:5] == 'START':
                     trialData = []
                     aoi = ["NA"]
+                    fixation = False
                     participantInfo[4] = 'NA'
                     participantInfo[5] = 'fixationCross'
                     participantInfo[6] = 'NA'
@@ -75,6 +76,7 @@ for file in listdir("../data/"):
                     continue
 
                 if line[:4] == 'EFIX':
+                    fixation = True
                     line = line.strip()
                     line = line.split()
 
@@ -146,5 +148,10 @@ for file in listdir("../data/"):
 
                     if 'RESPONSE_MADE' in line:
                         responseTime = float(line[1])
+
+                        if not fixation:
+                            line = ['NA', 'NA', 'NA', 'NA', 'NA', 'NA', 'NA']
+                            aoi = ['NONE']
+                            trialData.append(participantInfo + line + aoi)
 
 
