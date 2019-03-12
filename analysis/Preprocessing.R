@@ -65,3 +65,7 @@ fixations[aoi=="", aoi:=NA]
 
 # Write data
 fwrite(fixations, "NS01fixationsLong.csv", row.names=F)
+
+if (nrow(data)==nrow(fixations)){
+  rm(list=ls())
+}
