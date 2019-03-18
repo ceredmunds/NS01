@@ -128,7 +128,7 @@ glmer(choice ~ value.difference * attention.difference * condition + (1 | value.
 ```
 
 # Experiment running notes
-Participant 6, 9, 11, 14, 15, 24, 26, 34, 42: calibration and validation seemed to go very well, but fixation cross did not work for them.
+Participant 6, 9, 11, 14, 15, 24, 26, 34, 42, 47: calibration and validation seemed to go very well, but fixation cross did not work for them.
 Participant 10, 22: fixation cross started going weird towards the end. Perhaps didn't complete the rating task. 
 Participant 20, 39: could not calibrate
 

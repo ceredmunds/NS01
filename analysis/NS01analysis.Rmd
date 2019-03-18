@@ -206,7 +206,7 @@ summary(value.model)
 
 
 attention.value.interaction <- glmer(response ~ attention.difference*value.difference + 
-                           (1 + value.difference|participantNo), 
+                           (1 + value.difference||participantNo), 
                data = fixations[task=="continuous"],
                family = binomial)
 summary(attention.value.interaction)
