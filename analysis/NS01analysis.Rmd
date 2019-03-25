@@ -21,7 +21,7 @@ data <- data[!participantNo %in% badCalib,]
 ```
 
 ## Summary statistics
-```{r Summary statistics}
+```{r Summary statistics, echo=FALSE}
 N <- length(unique(data$participantNo))
 ```
 
@@ -29,7 +29,6 @@ N <- length(unique(data$participantNo))
 Currently have `r N` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
 
 ## Exclusions
-We excluded all participants who were outliers in the time spent off task.
 ```{r Exclusions based on attention: binary task}
 binary <- data[task=='binary' & intra_choice==1,]
 binary[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
@@ -86,9 +85,9 @@ contExclusions <- c(continuous.means[V1<0.60, participantNo])
 data <- data[!participantNo %in% contExclusions,]
 
 ```
-We excluded participants in both conditions that had average on task time of less than 0.60, which resulted in excluding two participants.
+As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of this to determine where a natural break point would be. For both tasks, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(contExclusions)` participants.
 
-We excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all trials.
+Additionally, we excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all trials.
 ```{r Exclusions based on reaction times}
 # Excluding trials based on reaction times
 data[, excludeTrial:= ifelse(rt<200 | rt>mean(rt)+3*sd(rt), 1, 0)]
