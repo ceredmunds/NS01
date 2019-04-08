@@ -12,7 +12,7 @@ rm(list=ls())
 
 require(data.table); require(plyr); require(lme4); require(ggplot2); require(MuMIn)
 
-data <- fread('/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv', stringsAsFactors=F)
+data <- fread('NS01fixationsLong.csv', stringsAsFactors=F)
 
 effedUp <- c(1)
 badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47) # Wrong eye
@@ -90,7 +90,7 @@ data <- data[!participantNo %in% continuousExclusions,]
 # Tidying
 rm(continuous.summary, continuous.summary.plot)
 ```
-As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of the mean proportion for each participant to determine where a natural break point would be. For the binary task, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(contExclusions)` participants, resulting in `r length(unique(data$participantNo))` remaining participants. 
+As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of the mean proportion for each participant to determine where a natural break point would be. For the binary task, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(continuousExclusions)` participants, resulting in `r length(unique(data$participantNo))` remaining participants. 
 
 Additionally, we excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all trials.
 ```{r Exclusions based on reaction times}
@@ -133,13 +133,21 @@ fixations[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 
 ```
 
 ```{r Analysis of binary task}
+fixations[, participantNoF:=as.factor(participantNo)]
+
+
+# Neil's mess....
 binary.full <- glmer(response ~ attention.difference*value.difference + 
-                             (1 | participantNo) +
-                             (1 | participantNo:attention.difference) +
-                             (1 | participantNo:value.difference),
-                           data=fixations[task=="binary",],
-                           family=binomial, control=glmerControl(tol=0.01))
-summary(binary.full.model)
+                             (1 + attention.difference*value.difference || participantNo), family=binomial, 
+                           data=fixations[task=="binary",])
+
+
+# fixations[task=="binary", .(model=glm(response ~ attention.difference*value.difference, data=.SD)), by=.(participantNo)]
+
+# lmList
+
+
+summary(binary.full)
 
 binary2 <-  glmer(response ~ attention.difference*value.difference + 
                              (1 | participantNo:attention.difference) +
