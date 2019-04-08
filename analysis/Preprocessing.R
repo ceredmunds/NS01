@@ -54,11 +54,11 @@ fixations[, fixStartTr:= ifelse(fixStart<trialStartTime, trialStartTime, fixStar
 fixations[, fixStartTr:= ifelse(fixStartTr>trialFinishTime, trialFinishTime, fixStartTr)]
 fixations[, fixEndTr:=ifelse(fixEnd<trialStartTime, trialStartTime, fixEnd)]
 fixations[, fixEndTr:=ifelse(fixEndTr>trialFinishTime, trialFinishTime, fixEndTr)]
-fixations[, fixDurationTr:=fixEndTr-fixStartTr]
-fixations[, fixDurationProp:=fixDurationTr/rt]
+fixations[, fixLengthTr:=fixEndTr-fixStartTr]
+fixations[, fixLengthProp:=fixLengthTr/rt]
 
 # Flag fixations during choice
-fixations[, intra_choice:=ifelse(fixDurationTr>0, 1, 0)]
+fixations[, intra_choice:=ifelse(fixLengthTr>0, 1, 0)]
 
 # Tidy aoi
 fixations[aoi=="", aoi:=NA]
