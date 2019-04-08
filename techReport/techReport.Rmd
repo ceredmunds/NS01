@@ -91,7 +91,7 @@ In both of the choice tasks, two landscape stimuli (each 514 x 384px) were displ
 In the final, valuation task, participants judged how much they liked each picture on a vertical Likert scale (1=strongly dislike, 7=strongly like). Each of the 200 stimuli were displayed once in a random order. Participants were offered the chance to take a self-paced break every 50 stimuli. A blank, black screen was displayed for 500ms between each rating. Throughout the experiment, the eye-tracker was validated every 25 trials.
 
 ## Analysis
-The continuous scale was split into a hundred bins. The analysis was pre-registered at \url{AsPredicted.org}.
+The continuous scale was split into a hundred bins. The analysis was pre-registered at \url{AsPredicted.org}. Areas of interest were defined as the area of the stimulus and a box around the response scales. 
 
 # Results
 
@@ -102,6 +102,9 @@ Data from all experiments reported in this article are publically available via 
 ```{r Data cleaning, include=FALSE}
 
 ```
+Participants were excluded on a task by task basis. Previous research indicates that some participants spend a considerable amount of time off task. Here, we excluded participants whose proportion of time spent on task during each trial (looking at either stimuli or the response scale). One participant was found to be an outlier in the binary task (i.e. averaged proportion of time spent on task was less than the first quartile minus 1.5 times the interquartile range) and their data was removed. This left 53 participants. 
+
+
 
 ## Analysis
 

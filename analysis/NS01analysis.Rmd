@@ -15,7 +15,7 @@ require(data.table); require(plyr); require(lme4); require(ggplot2)
 data <- fread('/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv', stringsAsFactors=F)
 
 effedUp <- c(1)
-badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47)
+badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47) # Wrong eye
 
 data <- data[!participantNo %in% badCalib,]
 ```
@@ -26,66 +26,71 @@ N <- length(unique(data$participantNo))
 ```
 
 ### Participants
-Currently have `r N` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
+In total, we have `r N` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
 
 ## Exclusions
 ```{r Exclusions based on attention: binary task}
 binary <- data[task=='binary' & intra_choice==1,]
 binary[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
-binary[, onTaskTime:= onTask*fixDurationProp]
-binary.summary <- as.data.table(aggregate(onTaskTime ~ participantNo + trial, data=binary, FUN=sum))
+binary[, onTaskProp:= onTask*fixLengthTr/rt]
+binary.summary <- as.data.table(aggregate(onTaskProp ~ participantNo + trial, data=binary, FUN=sum))
 
-binary.boxplot <- ggplot(binary.summary, aes(x=participantNo, y=onTaskTime, group=participantNo)) + 
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title="Time spent on task in binary condition", x="Participant", y="Time on task") + 
-  ylim(c(0, 1))
-binary.boxplot
+binary.summary.plot <- as.data.table(aggregate(onTaskProp ~ participantNo, data=binary.summary, FUN=mean))
 
-binary.histogram <- ggplot(binary.summary, aes(x=onTaskTime)) + 
-  geom_histogram(binwidth=0.01) + 
+boxplot(binary.summary.plot$onTaskProp)
+# One outlier at around 0.53, propose cut off of 60% 
+
+binary.histogram <- ggplot(binary.summary.plot, aes(x=onTaskProp)) + 
+  geom_histogram(binwidth=0.01) +
   theme_minimal() +
-  labs(title="Histogram of time on task for every trial for every participant in binary task", 
-       x="Time on task", y="Count") +
-  xlim(c(0, 1))
+  
+  labs(title="Histogram of proportion of time on task for every participant in binary task", 
+       x="Proportion of trial on task", y="Count") +
+  xlim(c(0.5, 1))
 binary.histogram
 
-binary.means <- as.data.table(binary.summary[, mean(onTaskTime, na.rm = TRUE), by=participantNo])
-binaryExclusions <- c(binary.means[V1<0.60, participantNo])
+# Get excluded participant
+binaryExclusions <- c(binary.summary.plot[onTaskProp<0.60, participantNo])
 
+# Remove participant
 data <- data[!participantNo %in% binaryExclusions,]
-```
 
+# Tidying
+rm(binary.summary, binary.summary.plot)
+```
 
 ```{r Exclusions based on attention: continuous task}
 continuous <- data[task=='continuous' & intra_choice==1,]
 continuous[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
-continuous[, onTaskTime:= onTask*fixDurationProp]
-continuous.summary <- as.data.table(aggregate(onTaskTime ~ participantNo + trial, data=continuous, FUN=sum))
+continuous[, onTaskProp:= onTask*fixLengthTr/rt]
+continuous.summary <- as.data.table(aggregate(onTaskProp ~ participantNo + trial, 
+                                              data=continuous, FUN=sum))
 
-continuous.boxplot <- ggplot(continuous.summary, aes(x=participantNo, y=onTaskTime, group=participantNo)) + 
-  geom_boxplot() +
-  theme_minimal() +
-  labs(title="Time spent on task in continuous condition", x="Participant", y="Time on task") + 
-  ylim(c(0, 1))
-continuous.boxplot
+continuous.summary.plot <- as.data.table(aggregate(onTaskProp ~ participantNo, 
+                                                   data=continuous.summary, FUN=mean))
 
-continuous.histogram <- ggplot(continuous.summary, aes(x=onTaskTime)) + 
+boxplot(continuous.summary.plot$onTaskProp)
+# No outliers according to boxplot 
+
+continuous.histogram <- ggplot(continuous.summary.plot, aes(x=onTaskProp)) + 
   geom_histogram(binwidth=0.01) + 
   theme_minimal() +
-  labs(title="Histogram of time on task for every trial for every participant in continuous task", 
+  labs(title="Histogram of time on task for every participant in continuous task", 
        x="Time on task", y="Count") +
-  xlim(c(0, 1))
+  xlim(c(0.5, 1))
 continuous.histogram
 
-# Get subjective values
-continuous.means <- as.data.table(continuous.summary[, mean(onTaskTime, na.rm = TRUE), by=participantNo])
-contExclusions <- c(continuous.means[V1<0.60, participantNo])
+# Not really needed, due to lack of exclusions. There in case change mind.
+# Get excluded participant(s)
+continuousExclusions <- c(continuous.summary.plot[onTaskProp<0, participantNo])
 
-data <- data[!participantNo %in% contExclusions,]
+# Remove participant
+data <- data[!participantNo %in% continuousExclusions,]
 
+# Tidying
+rm(continuous.summary, continuous.summary.plot)
 ```
-As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of this to determine where a natural break point would be. For both tasks, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(contExclusions)` participants.
+As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of the mean proportion for each participant to determine where a natural break point would be. For the binary task, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(contExclusions)` participants, resulting in `r length(unique(data$participantNo))` remaining participants. 
 
 Additionally, we excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all trials.
 ```{r Exclusions based on reaction times}
@@ -211,3 +216,7 @@ attention.value.interaction <- glmer(response ~ attention.difference*value.diffe
 summary(attention.value.interaction)
 ```
 
+# To do
+- models by task (data[task=="cont"] etc.)
+- full interaction model to show between task effect
+- inverse-U relationship between value and rt? in rating tasks.
