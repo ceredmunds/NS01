@@ -64,7 +64,7 @@ fixations[, intra_choice:=ifelse(fixLengthTr>0, 1, 0)]
 fixations[aoi=="", aoi:=NA]
 
 # Write data
-fwrite(fixations, "NS01fixationsLong.csv", row.names=F)
+fwrite(fixations, "/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv", row.names=F)
 
 if (nrow(data)==nrow(fixations)){
   rm(list=ls())
