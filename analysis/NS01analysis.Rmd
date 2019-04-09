@@ -12,25 +12,23 @@ rm(list=ls())
 
 require(data.table); require(plyr); require(lme4); require(ggplot2); require(MuMIn)
 
-data <- fread('NS01fixationsLong.csv', stringsAsFactors=F)
+fixations <- fread('NS01fixationsLong.csv', stringsAsFactors=F)
 
-effedUp <- c(1)
-badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47) # Wrong eye
-
-data <- data[!participantNo %in% badCalib,]
 ```
 
 ## Summary statistics
-```{r Summary statistics, echo=FALSE}
-N <- length(unique(data$participantNo))
-```
-
-### Participants
-In total, we have `r N` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
+In total, we have `r length(unique(fixations$participantNo))` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
 
 ## Exclusions
-```{r Exclusions based on time on task: binary task}
-binary <- data[task=='binary' & intra_choice==1,]
+```{r Exclude participants for which I tracked wrong eye}
+effedUp <- c(1)
+badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47) # Wrong eye
+
+fixations <- fixations[!participantNo %in% badCalib,]
+```
+
+```{r Exclusions based on time on task: binary task, cache=T}
+binary <- fixations[task=='binary' & intra_choice==1,]
 binary[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
 binary[, onTaskProp:= onTask*fixLengthTr/rt]
 binary.summary <- as.data.table(aggregate(onTaskProp ~ participantNo + trial, data=binary, FUN=sum))
@@ -43,7 +41,7 @@ boxplot(binary.summary.plot$onTaskProp)
 binary.histogram <- ggplot(binary.summary.plot, aes(x=onTaskProp)) + 
   geom_histogram(binwidth=0.01) +
   theme_minimal() +
-  
+  geom_vline(xintercept=0.6, colour="blue") +
   labs(title="Histogram of proportion of time on task for every participant in binary task", 
        x="Proportion of trial on task", y="Count") +
   xlim(c(0.5, 1))
@@ -53,14 +51,14 @@ binary.histogram
 binaryExclusions <- c(binary.summary.plot[onTaskProp<0.60, participantNo])
 
 # Remove participant
-data <- data[!participantNo %in% binaryExclusions,]
+fixations <- fixations[!participantNo %in% binaryExclusions,]
 
 # Tidying
 rm(binary.summary, binary.summary.plot)
 ```
 
-```{r Exclusions based on time on task: continuous task}
-continuous <- data[task=='continuous' & intra_choice==1,]
+```{r Exclusions based on time on task: continuous task, cache=T}
+continuous <- fixations[task=='continuous' & intra_choice==1,]
 continuous[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
 continuous[, onTaskProp:= onTask*fixLengthTr/rt]
 continuous.summary <- as.data.table(aggregate(onTaskProp ~ participantNo + trial, 
@@ -85,28 +83,28 @@ continuous.histogram
 continuousExclusions <- c(continuous.summary.plot[onTaskProp<0, participantNo])
 
 # Remove participant
-data <- data[!participantNo %in% continuousExclusions,]
+fixations <- fixations[!participantNo %in% continuousExclusions,]
 
 # Tidying
 rm(continuous.summary, continuous.summary.plot)
 ```
-As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of the mean proportion for each participant to determine where a natural break point would be. For the binary task, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(continuousExclusions)` participants, resulting in `r length(unique(data$participantNo))` remaining participants. 
+As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of the mean proportion for each participant to determine where a natural break point would be. For the binary task, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(continuousExclusions)` participants, resulting in `r length(unique(fixations$participantNo))` remaining participants, who completed all trials.  
 
-Additionally, we excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all trials.
+Additionally, we excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all task trials (i.e. not including the liking rating task).
 ```{r Exclusions based on reaction times}
 # Excluding trials based on reaction times
-data[, excludeTrial:= ifelse(rt<200 | rt>mean(rt)+3*sd(rt), 1, 0)]
-data[, exclude:= excludeTrial/.N, by=list(participantNo, trial)]
+fixations[, excludeTrial:= ifelse((rt<200 | rt>mean(rt)+3*sd(rt)) & task!="valuation", 1, 0)]
 
-# Summary of exclusions by reaction time
-exclusions <- aggregate(data$exclude, list(data$participantNo), sum)
-colnames(exclusions) <- c("participantNo", "nExclusions")
-exclusions["percentExcluded"] <- (exclusions$nExclusions/300)*100
-percentTrialsExcluded <- mean(exclusions$percentExcluded)
+# Get break down of exclusions per task and per participant
+rt.exclusions <- fixations[task!="valuation", list(excludeN=sum(excludeTrial)/.N), 
+                      by=list(participantNo, trial, task)]
+rt.exclusions.by.task <- rt.exclusions[, list(propExclude=sum(excludeN)/.N), by=task]
+rt.exclusions.by.ppt <- rt.exclusions[, list(propExclude=sum(excludeN)/.N), by=.(participantNo)]
 
 # Remove those trials
-data <- data[excludeTrial==0,]
+fixations <- fixations[excludeTrial==0,]
 ```
+This resulted in excluding `r signif(rt.exclusions.by.task[task=="continuous", propExclude], 3)*100`% of trials in the continuous task, `r signif(rt.exclusions.by.task[task=="binary", propExclude], 3)*100`% of trials in binary task. The maximum number of trials excluded for a single participant was `r max(rt.exclusions.by.ppt$propExclude)*100`% across the two tasks. 
 
 ## Data exploration
 ```{r  Data exploration}
@@ -115,178 +113,71 @@ data <- data[excludeTrial==0,]
 
 
 ## Analysis
-```{r Get data table for analysis}
-fixations <- dcast(data, participantNo + task + taskOrder + block + trial + response + rt +
+```{r Get data table for analysis, cache=T}
+data <- dcast(fixations, participantNo + task + taskOrder + block + trial + response + rt +
                      lValue + rValue ~ aoi,
                    fun = sum, value.var="fixLengthProp")
-fixations[, V1:=NULL]
+data[, V1:=NULL]
 
-fixations[, value.difference:=rValue-lValue]
-fixations[, attention.difference:=right-left]
+data[, value.difference:=rValue-lValue]
+data[, attention.difference:=right-left]
 
-fixations[, response:=as.double(response)]
-fixations[task=="binary", response:= response-1]
-fixations[task=="continuous", response:= (response-1.0)/99.0]
+data[, response:=as.double(response)]
+data[task=="binary", response:= response-1]
+data[task=="continuous", response:= (response-1.0)/99.0]
 
-fixations[, recodedResponse:= response]
-fixations[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
+data[, recodedResponse:= response]
+data[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
+
+data[, `:=`(participantNo=factor(participantNo), task=factor(task))]
 ```
 
 ```{r Analysis of binary task}
-fixations[, participantNoF:=as.factor(participantNo)]
-
-
-# Neil's mess....
-binary.full <- glmer(response ~ attention.difference*value.difference + 
-                             (1 + attention.difference*value.difference || participantNo), family=binomial, 
-                           data=fixations[task=="binary",])
-
-
-# fixations[task=="binary", .(model=glm(response ~ attention.difference*value.difference, data=.SD)), by=.(participantNo)]
-
-# lmList
-
-
+binary.full <- glmer(response ~ attention.difference*value.difference +
+                       (1 + attention.difference*value.difference|| participantNo),
+                     family="binomial", data=data[task=="binary",])
 summary(binary.full)
-
-binary2 <-  glmer(response ~ attention.difference*value.difference + 
-                             (1 | participantNo:attention.difference) +
-                             (1 | participantNo:value.difference),
-                           data=fixations[task=="binary",],
-                           family=binomial)
-summary(binary2)
-
-binary1 <-  glmer(response ~ attention.difference*value.difference + 
-                             (1 | participantNo:value.difference),
-                           data=fixations[task=="binary",],
-                           family=binomial)
-summary(binary1)
-
-binary0 <- lm(response~attention.difference*value.difference, data=fixations[task=="binary",])
-summary(binary0)
-
-anova(binary.full, binary2, binary0, binary1)
-
 ```
-
-Think this means that binary1 is the best model: so main effects of attention and value, and nested random effects of value difference in participantNo. 
 
 ```{r Analysis of continuous task}
-continuous.full <- glmer(recodedResponse ~ attention.difference*value.difference + 
-                                (1|participantNo) + 
-                                (1|participantNo:value.difference) +
-                                (1|participantNo:attention.difference),
-                           data=fixations[task=="continuous",], 
-                           family="binomial", control=glmerControl(tol=0.01))
+continuous.full <- glmer(recodedResponse ~ attention.difference*value.difference +
+                       (1 + attention.difference*value.difference|| participantNo),
+                     family="binomial", data=data[task=="continuous",])
 summary(continuous.full)
 
-continuous2 <-  glmer(recodedResponse ~ attention.difference*value.difference + 
-                             (1 | participantNo:attention.difference) +
-                             (1 | participantNo:value.difference),
-                           data=fixations[task=="continuous",],
-                           family=binomial)
-summary(continuous2)
-
-continuous1 <-  glmer(recodedResponse ~ attention.difference*value.difference + 
-                             (1 | participantNo:value.difference),
-                           data=fixations[task=="continuous",],
-                           family=binomial)
-summary(continuous1)
-
-continuous0 <- lm(recodedResponse~attention.difference*value.difference, 
-              data=fixations[task=="continuous",])
-summary(continuous0)
-
-anova(continuous.full, continuous2, continuous0, continuous1)
 ```
-Again, I think that means that continuous1 is the best model. Maybe :) 
+
 ```{r Analysis of continuous task (continuous responses)}
-continuous.full <- lmer(response ~ attention.difference*value.difference + 
-                                (1|participantNo) +
-                                (1|participantNo:value.difference),
-                           data=fixations[task=="continuous",])
-summary(continuous.full)
-
-continuous2 <-  lmer(response ~ attention.difference*value.difference + 
-                             (1 | participantNo:value.difference),
-                           data=fixations[task=="continuous",])
-summary(continuous2)
-
-continuous1 <-  glmer(recodedResponse ~ attention.difference*value.difference + 
-                             (1 | participantNo),
-                           data=fixations[task=="continuous",],
-                           family=binomial)
-summary(continuous1)
-
-continuous0 <- lm(response~attention.difference*value.difference, 
-              data=fixations[task=="continuous",])
-summary(continuous0)
-
-anova(continuous.full, continuous2, continuous0, continuous1)
-# Continuous2 lowest AIC
+# continuous.full <- lmer(response ~ attention.difference*value.difference +
+#                         (1 + attention.difference*value.difference|| participantNo),
+#                         data=data[task=="continuous",], glmerControl(optCtrl=list(maxfun=1e6)))
+# summary(continuous.full)
 ```
 
 ```{r Including task as main effect}
-full <- glmer(recodedResponse ~ attention.difference*value.difference*task + 
-                                (1|participantNo) + 
-                                (1|participantNo:value.difference) +
-                                (1|participantNo:attention.difference),
-                           data=fixations[task!="valuation",], 
-                           family="binomial", control=glmerControl(tol=0.01))
-summary(full)
-
-task4 <- update(full, ~ . - attention.difference:value.difference:task)
-summary(task4)
-
-task3 <- update(task4, ~ . - value.difference:task)
-summary(task3)
-
-task2 <- update(task3, ~ . - attention.difference:value.difference)
-summary(task2)
-
-task1 <- update(task2, ~ . - task)
-summary(task1)
-
-task0 <- lm(recodedResponse ~ attention.difference*value.difference*task, 
-            data=fixations[task!="valuation"])
-summary(task0)
-
-anova(full, task4, task3, task2, task1)
-# AIC's get smaller as we decrease but don't really change that much. 
+# full <- glmer(recodedResponse ~ attention.difference*value.difference*task + 
+#                                 (1 + attention.difference*value.difference*task||participantNo),
+#                            data=data[task!="valuation",], 
+#                            family="binomial", control=glmerControl(optCtrl=list(maxfun=1e6)))
+# summary(full)
 ```
-Seems like main effects of attention and value. Also, an interaction of task and attention: participants choices are guided more by attention in the continuous task than the binary task. I guess this matches our intuition that participants' choices are more considered in the continuous task than the binary one. 
-
 
 
 
 # Notes
-So, in this analysis there is a `r signif(cor(fixations[task!="valuation", value.difference], fixations[task!="valuation", attention.difference]),3)` correlation between attention difference and value difference: participants seem to look at the higher value option for longer. However, the interaction is not 
-
-
-
-
-```{r Analysis of continuous responses}
-attention.model <- glmer(response ~ attention.difference + 
-                           (1 + attention.difference|participantNo), 
-               data = fixations[task=="continuous"],
-               family = binomial)
-summary(attention.model)
-
-value.model <- glmer(response ~ value.difference + 
-                           (1 + value.difference|participantNo), 
-               data = fixations[task=="continuous"],
-               family = binomial)
-summary(value.model)
-
-
-attention.value.interaction <- glmer(response ~ attention.difference*value.difference + 
-                           (1 + value.difference||participantNo), 
-               data = fixations[task=="continuous"],
-               family = binomial)
-summary(attention.value.interaction)
-```
+So, in this analysis there is a `r signif(cor(data[task!="valuation", value.difference], data[task!="valuation", attention.difference]),3)` correlation between attention difference and value difference: participants seem to look at the higher value option for longer. However, the interaction is not 
 
 # To do
 - models by task (data[task=="cont"] etc.)
 - full interaction model to show between task effect
 - inverse-U relationship between value and rt? in rating tasks.
+
+
+# To double check: you need to plot attention against value for the different quintiles, then plot the models for each person over top. 
+To get the glm model fits for each person, it's something like:
+
+fixations[task=="binary", .(model=glm(response ~ attention.difference*value.difference, data=.SD)), by=.(participantNo)]
+
+or
+
+lmList
