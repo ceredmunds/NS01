@@ -16,18 +16,21 @@ fixations <- fread('NS01fixationsLong.csv', stringsAsFactors=F)
 
 ```
 
-## Summary statistics
+# Results
 In total, we have `r length(unique(fixations$participantNo))` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
 
 ## Exclusions
-```{r Exclude participants for which I tracked wrong eye}
+```{r Exclude participants for which I tracked wrong eye, echo=F, cache=T}
 effedUp <- c(1)
 badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47) # Wrong eye
 
 fixations <- fixations[!participantNo %in% badCalib,]
 ```
 
-```{r Exclusions based on time on task: binary task, cache=T}
+As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted boxplots and histograms of the mean proportion for each participant to determine where a natural break point would be (and to see if any outliers were detected).
+
+### Binary task
+```{r Exclusions based on time on task: binary task, cache=T, echo=F}
 binary <- fixations[task=='binary' & intra_choice==1,]
 binary[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
 binary[, onTaskProp:= onTask*fixLengthTr/rt]
@@ -36,6 +39,7 @@ binary.summary <- as.data.table(aggregate(onTaskProp ~ participantNo + trial, da
 binary.summary.plot <- as.data.table(aggregate(onTaskProp ~ participantNo, data=binary.summary, FUN=mean))
 
 boxplot(binary.summary.plot$onTaskProp)
+title("Proportion of time spent on task in the binary task.")
 # One outlier at around 0.53, propose cut off of 60% 
 
 binary.histogram <- ggplot(binary.summary.plot, aes(x=onTaskProp)) + 
@@ -52,12 +56,12 @@ binaryExclusions <- c(binary.summary.plot[onTaskProp<0.60, participantNo])
 
 # Remove participant
 fixations <- fixations[!participantNo %in% binaryExclusions,]
-
-# Tidying
-rm(binary.summary, binary.summary.plot)
 ```
 
-```{r Exclusions based on time on task: continuous task, cache=T}
+As can be seen from the boxplot and histogram, there was only one participant found to be an outlier (less than the first quartiler minus 1.5 times the interquartile range) in terms of time spent on task in the binary task.
+
+### Continuous task
+```{r Exclusions based on time on task: continuous task, cache=T, echo=FALSE}
 continuous <- fixations[task=='continuous' & intra_choice==1,]
 continuous[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
 continuous[, onTaskProp:= onTask*fixLengthTr/rt]
@@ -68,6 +72,7 @@ continuous.summary.plot <- as.data.table(aggregate(onTaskProp ~ participantNo,
                                                    data=continuous.summary, FUN=mean))
 
 boxplot(continuous.summary.plot$onTaskProp)
+title("Proportion of time spent on task in the continuous task.")
 # No outliers according to boxplot 
 
 continuous.histogram <- ggplot(continuous.summary.plot, aes(x=onTaskProp)) + 
@@ -84,13 +89,16 @@ continuousExclusions <- c(continuous.summary.plot[onTaskProp<0, participantNo])
 
 # Remove participant
 fixations <- fixations[!participantNo %in% continuousExclusions,]
-
-# Tidying
-rm(continuous.summary, continuous.summary.plot)
 ```
-As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted a histogram of the mean proportion for each participant to determine where a natural break point would be. For the binary task, this turned out to be 0.60. This resulted in excluding `r length(binaryExclusions) + length(continuousExclusions)` participants, resulting in `r length(unique(fixations$participantNo))` remaining participants, who completed all trials.  
 
+As can be seen from the boxplot and histogram, there were no participants found to be outliers in the continuous task.
+
+Therefore, we excluded `r length(binaryExclusions) + length(continuousExclusions)` participants, resulting in `r length(unique(fixations$participantNo))` remaining participants, who completed all tasks.  
+
+
+### Reaction times
 Additionally, we excluded all trials with reaction times less than 200ms and trials where the reaction time is 3 standard deviations above the mean reaction time across all task trials (i.e. not including the liking rating task).
+
 ```{r Exclusions based on reaction times}
 # Excluding trials based on reaction times
 fixations[, excludeTrial:= ifelse((rt<200 | rt>mean(rt)+3*sd(rt)) & task!="valuation", 1, 0)]
@@ -104,7 +112,15 @@ rt.exclusions.by.ppt <- rt.exclusions[, list(propExclude=sum(excludeN)/.N), by=.
 # Remove those trials
 fixations <- fixations[excludeTrial==0,]
 ```
-This resulted in excluding `r signif(rt.exclusions.by.task[task=="continuous", propExclude], 3)*100`% of trials in the continuous task, `r signif(rt.exclusions.by.task[task=="binary", propExclude], 3)*100`% of trials in binary task. The maximum number of trials excluded for a single participant was `r max(rt.exclusions.by.ppt$propExclude)*100`% across the two tasks. 
+
+This resulted in excluding `r signif(rt.exclusions.by.task[task=="continuous", propExclude], 3)*100`% of trials in the continuous task, and `r signif(rt.exclusions.by.task[task=="binary", propExclude], 3)*100`% of trials in binary task. The maximum number of trials excluded for a single participant was `r max(rt.exclusions.by.ppt$propExclude)*100`% across the two tasks. 
+
+```{r Tidying before analysis, echo=F, warning=F, message=F, results='hide'}
+# Tidying
+rm(binary, binary.summary, binary.summary.plot, binary.histogram, binaryExclusions, 
+   continuous, continuous.summary, continuous.summary.plot, continuous.histogram, continuousExclusions, 
+   rt.exclusions, rt.exclusions.by.task, rt.exclusions.by.ppt)
+```
 
 ## Data exploration
 ```{r  Data exploration}
