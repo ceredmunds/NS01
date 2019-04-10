@@ -12,7 +12,8 @@ output:
 ```{r Setup, message=F, echo=F, results='hide'}
 rm(list=ls()) 
 
-require(data.table); require(plyr); require(lme4); require(ggplot2); require(MuMIn)
+require(data.table); require(plyr); require(lme4); require(ggplot2); require(MuMIn);
+require(GGally)
 
 require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
 
@@ -34,7 +35,7 @@ fixations <- fixations[!participantNo %in% badCalib,]
 As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted boxplots and histograms of the mean proportion for each participant to determine where a natural break point would be (and to see if any outliers were detected).
 
 ### Binary task
-```{r Exclusions based on time on task: binary task, cache=T, echo=F}
+```{r Exclusions based on time on task: binary task, echo=F}
 binary <- fixations[task=='binary' & intra_choice==1,]
 binary[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
 binary[, onTaskProp:= onTask*fixLengthTr/rt]
@@ -65,7 +66,7 @@ fixations <- fixations[!participantNo %in% binaryExclusions,]
 As can be seen from the boxplot and histogram, there was only one participant found to be an outlier (less than the first quartiler minus 1.5 times the interquartile range) in terms of time spent on task in the binary task.
 
 ### Continuous task
-```{r Exclusions based on time on task: continuous task, cache=T, echo=FALSE}
+```{r Exclusions based on time on task: continuous task, echo=FALSE}
 continuous <- fixations[task=='continuous' & intra_choice==1,]
 continuous[, onTask:= ifelse(aoi=="left" | aoi=="right" | aoi=="likertHorizontal", 1, 0)]
 continuous[, onTaskProp:= onTask*fixLengthTr/rt]
@@ -126,12 +127,6 @@ rm(binary, binary.summary, binary.summary.plot, binary.histogram, binaryExclusio
    rt.exclusions, rt.exclusions.by.task, rt.exclusions.by.ppt)
 ```
 
-## Data exploration
-```{r  Data exploration}
-
-```
-
-
 ## Analysis
 ```{r Get data table for analysis, cache=T, echo=F}
 data <- dcast(fixations, participantNo + task + taskOrder + block + trial + response + rt +
@@ -152,6 +147,50 @@ data[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
 
 data[, `:=`(participantNo=factor(participantNo), task=factor(task))]
 ```
+
+## Data exploration
+```{r  Data exploration}
+ggpairs(data[task=="binary", c("attention.difference", "value.difference")],
+        title="Correlations between predictors for binary task.")
+cor.test(data$attention.difference[data$task=="binary"], data$value.difference[data$task=="binary"])
+
+ggpairs(data[task=="continuous", c("attention.difference", "value.difference")],
+        title="Correlations between predictors for continuous task.")
+cor.test(data$attention.difference[data$task=="continuous"], 
+         data$value.difference[data$task=="continuous"])
+
+ggpairs(data[task!="valuation", c("attention.difference", "value.difference")],
+        title="Correlations between predictors for both tasks.")
+
+ggplot(data[task!="valuation"], aes(x = task, y = value.difference)) +
+  stat_sum(aes(size = ..n.., group = 1)) +
+  scale_size_area(max_size=10)
+
+ggplot(data[task!="valuation"], aes(x = task, y = attention.difference)) +
+  geom_jitter(alpha = .1) +
+  geom_violin(alpha = .75) 
+
+ggplot(data[task!="valuation"], aes(x=attention.difference, y = rt, fill=factor(task))) +
+  geom_point() +
+  facet_grid(. ~ task)
+ggplot(data[task!="valuation"], aes(x=value.difference, y = rt, fill=factor(task))) +
+  geom_point() +
+  facet_grid(. ~ task)
+
+ggplot(data[task!="valuation"], aes(x=factor(recodedResponse), y = attention.difference, fill=factor(recodedResponse))) +
+  geom_boxplot()
+ggplot(data[task!="valuation"], aes(x=factor(recodedResponse), y = value.difference, fill=factor(recodedResponse))) +
+  geom_boxplot()
+
+hist(data$response[data$task=="continuous"])
+hist(abs(data$response[data$task=="continuous"]-0.5))
+
+hist(data$response[data$task=="continuous" & data$taskOrder==1])
+hist(data$response[data$task=="continuous" & data$taskOrder==2])
+
+```
+
+
 
 So, we were interested in whether the interaction effect was greater in the continuous task or in the binary task.
 
@@ -190,6 +229,58 @@ summary(rt4)
 anova(rt3, rt4) # Sig: prefer rt3
 ```
 
+```{r Checking RT model}
+models.binary <- data[task=="binary", 
+               as.list(coef(lm(.SD$rt ~ .SD$attention.difference*.SD$value.difference))), 
+               by=participantNo]
+colnames(models.binary) <- c("participantNo", "intercept", "attention.difference", "value.difference", "interaction")
+
+# 
+# attention vs. attention (lm vs. glmer)
+# 
+# trial predictions, 
+# 
+
+ggplot() +
+  scale_x_continuous(name="Attention", limits=c(-1, 1)) +
+  scale_y_continuous(name="RT", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.binary, 
+              mapping=aes(slope=attention.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+
+ggplot() +
+  scale_x_continuous(name="Value", limits=c(-6, 6)) +
+  scale_y_continuous(name="RT", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.binary, 
+              mapping=aes(slope=value.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+
+models.continuous <- data[task=="continuous", 
+               as.list(coef(lm(.SD$rt ~ .SD$attention.difference*.SD$value.difference))), 
+               by=participantNo]
+colnames(models.continuous) <- c("participantNo", "intercept", "attention.difference", 
+                                 "value.difference", "interaction")
+
+ggplot() +
+  scale_x_continuous(name="Attention", limits=c(-1, 1)) +
+  scale_y_continuous(name="RT", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.continuous, 
+              mapping=aes(slope=attention.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+
+ggplot() +
+  scale_x_continuous(name="Value", limits=c(-6, 6)) +
+  scale_y_continuous(name="RT", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.continuous, 
+              mapping=aes(slope=value.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+```
+
+
 ### Choice
 Another might be that choice was affected by task.
 
@@ -224,28 +315,77 @@ summary(choice3)
 anova(choice3, choice1) # Sig so prefer choice1
 ```
 
-```{r}
-choice1 <- glmer(recodedResponse ~ attention.difference*value.difference*task +
+```{r Checking choice model}
+models.binary <- data[task=="binary", 
+               as.list(coef(glm(.SD$recodedResponse ~ .SD$attention.difference*.SD$value.difference))), 
+               by=participantNo]
+colnames(models.binary) <- c("participantNo", "intercept", "attention.difference", "value.difference", "interaction")
+
+ggplot() +
+  scale_x_continuous(name="Attention", limits=c(-1, 1)) +
+  scale_y_continuous(name="Choice", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.binary, 
+              mapping=aes(slope=attention.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+
+ggplot() +
+  scale_x_continuous(name="Choice", limits=c(-6, 6)) +
+  scale_y_continuous(name="RT", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.binary, 
+              mapping=aes(slope=value.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+
+models.continuous <- data[task=="continuous", 
+               as.list(coef(lm(.SD$rt ~ .SD$attention.difference*.SD$value.difference))), 
+               by=participantNo]
+colnames(models.continuous) <- c("participantNo", "intercept", "attention.difference", 
+                                 "value.difference", "interaction")
+
+ggplot() +
+  scale_x_continuous(name="Attention", limits=c(-1, 1)) +
+  scale_y_continuous(name="Choice", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.continuous, 
+              mapping=aes(slope=attention.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+
+ggplot() +
+  scale_x_continuous(name="Value", limits=c(-6, 6)) +
+  scale_y_continuous(name="RT", limits=c(0, 6000)) +
+  scale_linetype(name="s") +
+  geom_abline(data=models.continuous, 
+              mapping=aes(slope=value.difference, intercept=intercept, 
+                          color=factor(participantNo)))
+
+# Removed component with smallest variance (interaction term)
+choice <- glmer(recodedResponse ~ attention.difference*value.difference +
                 (1 + attention.difference + value.difference||participantNo),
               data=data[task!="valuation",], family="binomial", 
               control=glmerControl(optimizer="Nelder_Mead"))
-summary(choice1)
+summary(choice)
 
-choice2 <- glmer(recodedResponse ~ attention.difference*value.difference +
-                (1 + attention.difference + value.difference||participantNo),
-              data=data[task!="valuation",], family="binomial", 
-              control=glmerControl(optimizer="Nelder_Mead"))
-summary(choice2)
+models <- data[, as.list(coef(glm(.SD$recodedResponse ~ .SD$attention.difference*.SD$value.difference))), 
+               by=participantNo]
+colnames(models) <- c("participantNo", "interceptF", "attention.differenceF", "value.differenceF", 
+                      "interactionF")
 
-anova(choice2, choice1) # N.s so prefer choice2
+models <- cbind(models, coef(choice)$participantNo)
 
-choice3 <- glmer(recodedResponse ~ attention.difference + value.difference +
-                (1 + attention.difference + value.difference||participantNo),
-              data=data[task!="valuation",], family="binomial", 
-              control=glmerControl(optimizer="Nelder_Mead"))
-summary(choice3)
-anova(choice2, choice3) # N.s so prefer choice3
-# No interaction and no effect of task
+ggplot(models, aes(x=attention.differenceF, y=attention.difference)) + 
+  geom_point() + 
+  scale_x_continuous(name="Participant wise glm", limits=c(-1, 1.5)) +
+  scale_y_continuous(name="GLMEMs", limits=c(-1, 10)) +
+  ggtitle("Comparison of mixed effects models with individual fits (attention)") + 
+  geom_abline(intecept=0, slope=1)
+
+ggplot(models, aes(x=value.differenceF, y=value.difference)) + 
+  geom_point() + 
+  scale_x_continuous(name="Participant wise glm", limits=c(-0.5, .5)) +
+  scale_y_continuous(name="GLMEMs", limits=c(-.5, 1.5)) +
+  ggtitle("Comparison of mixed effects models with individual fits (value)") + 
+  geom_abline(intecept=0, slope=1)
 ```
 
 
@@ -257,48 +397,31 @@ summary(binary.full)
 ```
 
 ```{r Analysis of continuous task, cache=T}
-continuous.full <- glmer(recodedResponse ~ attention.difference*value.difference +
+continuous.full.recoded <- glmer(recodedResponse ~ attention.difference*value.difference +
+                       (1 + attention.difference*value.difference|| participantNo),
+                     family="binomial", data=data[task=="continuous",])
+summary(continuous.full.recoded)
+
+
+continuous.full <- glmer(response ~ attention.difference*value.difference +
                        (1 + attention.difference*value.difference|| participantNo),
                      family="binomial", data=data[task=="continuous",])
 summary(continuous.full)
+
+cont <- lmer(response ~ attention.difference^2 + (1+attention.difference||participantNo),
+              data=data[task=="continuous"])
+summary(cont)
 ```
 
 So, it looks like there are main effects of attention and value on choice and main effects of task (as expected), an interaction of choice & attention and a hint of a three way interaction on rts.
 
-
-### Analysing continuous task more fully
-```{r Analysis of continuous task (continuous responses)}
-# continuous.full <- lmer(response ~ attention.difference*value.difference +
-#                         (1 + attention.difference*value.difference|| participantNo),
-#                         data=data[task=="continuous",], glmerControl(optCtrl=list(maxfun=1e6)))
-# summary(continuous.full)
-```
-
 # Notes
-So, in this analysis there is a `r signif(cor(data[task!="valuation", value.difference], data[task!="valuation", attention.difference]),3)` correlation between attention difference and value difference: participants seem to look at the higher value option for longer. 
-
-## Thoughts
-- speed/accuracy trade off and it's relationship between interaction vs. not. 
+So, in this analysis there is a `r signif(cor(data[task!="valuation", value.difference], data[task!="valuation", attention.difference]),3)` correlation between attention difference and value difference: participants seem to look at the higher value option for longer.
 
 
 
 # To do
-- inverse-U relationship between value and rt? in rating tasks.
+- inverse-U relationship between value and rt? in rating tasks. find what to do with U-shaped? (perhaps $x^2$)
 - need to do fitting checks and other things to avoid making silly mistakes 
-- hopefully done wednesday so can forward to Tim/Neil :) 
+- homoscedesity, leverage?
 
-
-# To double check: you need to plot attention against value for the different quintiles, then plot the models for each person over top. 
-To get the glm model fits for each person, it's something like:
-
-fixations[task=="binary", .(model=glm(response ~ attention.difference*value.difference, data=.SD)), by=.(participantNo)]
-
-or
-
-lmList
-
-
-Help from Naomi :) 
-lfe package; felm
-
-A final intuition might be that participants were more accurate in the continuous task than the binary task. 
