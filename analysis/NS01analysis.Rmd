@@ -424,4 +424,4 @@ So, in this analysis there is a `r signif(cor(data[task!="valuation", value.diff
 - inverse-U relationship between value and rt? in rating tasks. find what to do with U-shaped? (perhaps $x^2$)
 - need to do fitting checks and other things to avoid making silly mistakes 
 - homoscedesity, leverage?
-
+- gaze cascade
