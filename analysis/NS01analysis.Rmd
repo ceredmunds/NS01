@@ -229,6 +229,10 @@ summary(rt4)
 anova(rt3, rt4) # Sig: prefer rt3
 ```
 
+```{r}
+summary(rt3)
+```
+
 ```{r Checking RT model}
 models.binary <- data[task=="binary", 
                as.list(coef(lm(.SD$rt ~ .SD$attention.difference*.SD$value.difference))), 
