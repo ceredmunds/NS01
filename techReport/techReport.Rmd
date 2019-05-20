@@ -54,38 +54,112 @@ The continuous scale was split into a hundred bins. The analysis was pre-registe
 
 Data from all experiments reported in this article are publically available via the Open Science Framework (\url{https://osf.io/xfc8a/}).
 
-
 ## Exclusions
-```{r Data cleaning, include=FALSE}
-
-```
 Participants were excluded on a task by task basis. Previous research indicates that some participants spend a considerable amount of time off task. Here, we excluded participants whose proportion of time spent on task during each trial (looking at either stimuli or the response scale). One participant was found to be an outlier in the binary task (i.e. averaged proportion of time spent on task was less than the first quartile minus 1.5 times the interquartile range) and their data was removed. This left 53 participants. 
 
 Additionally, we excluded trials for which the reaction time was less that 200ms or greater than the mean plus three standard deviations (calculated across all trials). 
 
-## Analysis
+## Reaction times
+<table style="text-align:center"><caption><strong>Summary of coefficients of model predicting reaction time</strong></caption>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="1" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td>rt</td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">attention.difference</td><td>-65.120</td></tr>
+<tr><td style="text-align:left"></td><td>(84.291)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">value.difference</td><td>-1.856</td></tr>
+<tr><td style="text-align:left"></td><td>(10.763)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">taskcontinuous</td><td>663.016<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(32.874)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">attention.difference:value.difference</td><td>-178.467<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(38.468)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">attention.difference:taskcontinuous</td><td>69.555</td></tr>
+<tr><td style="text-align:left"></td><td>(122.382)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">value.difference:taskcontinuous</td><td>2.232</td></tr>
+<tr><td style="text-align:left"></td><td>(15.260)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">attention.difference:value.difference:taskcontinuous</td><td>-60.022</td></tr>
+<tr><td style="text-align:left"></td><td>(54.609)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>2,500.064<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(127.035)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>5,115</td></tr>
+<tr><td style="text-align:left">Log Likelihood</td><td>-43,241.430</td></tr>
+<tr><td style="text-align:left">Akaike Inf. Crit.</td><td>86,502.870</td></tr>
+<tr><td style="text-align:left">Bayesian Inf. Crit.</td><td>86,568.270</td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td style="text-align:right">\*p<0.1; \*\*p<0.05; \*\*\*p<0.01</td></tr>
+</table>
 
-For within-subjects analysis:
-glmer(choice ~ value.difference * attention.difference * condition + (1 | value.difference * attention.difference * condition || subject), family=binomial)
+## Choice
+<table style="text-align:center"><tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="1" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td>recodedResponse</td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">attention.difference</td><td>5.677<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.440)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">value.difference</td><td>0.891<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.062)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">taskcontinuous</td><td>-0.013</td></tr>
+<tr><td style="text-align:left"></td><td>(0.084)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">attention.difference:value.difference</td><td>0.060</td></tr>
+<tr><td style="text-align:left"></td><td>(0.174)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">attention.difference:taskcontinuous</td><td>0.574</td></tr>
+<tr><td style="text-align:left"></td><td>(0.416)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">value.difference:taskcontinuous</td><td>0.022</td></tr>
+<tr><td style="text-align:left"></td><td>(0.054)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">attention.difference:value.difference:taskcontinuous</td><td>-0.112</td></tr>
+<tr><td style="text-align:left"></td><td>(0.258)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>0.017</td></tr>
+<tr><td style="text-align:left"></td><td>(0.068)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>5,115</td></tr>
+<tr><td style="text-align:left">Log Likelihood</td><td>-1,881.974</td></tr>
+<tr><td style="text-align:left">Akaike Inf. Crit.</td><td>3,785.949</td></tr>
+<tr><td style="text-align:left">Bayesian Inf. Crit.</td><td>3,857.888</td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
 
-For first block only between-subjects analysis
+<table style="text-align:center"><caption><strong>Comparing linear probability model, with recoded continuous repsonses.</strong></caption>
+<tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="2"><em>Dependent variable:</em></td></tr>
+<tr><td></td><td colspan="2" style="border-bottom: 1px solid black"></td></tr>
+<tr><td style="text-align:left"></td><td>response</td><td>recodedResponse</td></tr>
+<tr><td style="text-align:left"></td><td><em>linear</em></td><td><em>generalized linear</em></td></tr>
+<tr><td style="text-align:left"></td><td><em>mixed-effects</em></td><td><em>mixed-effects</em></td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td></tr>
+<tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">attention.difference</td><td>0.510<sup>***</sup></td><td>6.461<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.033)</td><td>(0.509)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td></tr>
+<tr><td style="text-align:left">value.difference</td><td>0.081<sup>***</sup></td><td>0.886<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.005)</td><td>(0.061)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td></tr>
+<tr><td style="text-align:left">attention.difference:value.difference</td><td>-0.001</td><td>-0.032</td></tr>
+<tr><td style="text-align:left"></td><td>(0.009)</td><td>(0.214)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>0.503<sup>***</sup></td><td>-0.005</td></tr>
+<tr><td style="text-align:left"></td><td>(0.006)</td><td>(0.076)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td></tr>
+<tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Observations</td><td>2,547</td><td>2,547</td></tr>
+<tr><td style="text-align:left">Log Likelihood</td><td>-32.918</td><td>-941.290</td></tr>
+<tr><td style="text-align:left">Akaike Inf. Crit.</td><td>83.835</td><td>1,898.579</td></tr>
+<tr><td style="text-align:left">Bayesian Inf. Crit.</td><td>136.419</td><td>1,945.321</td></tr>
+<tr><td colspan="3" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="2" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>
 
-glmer(choice ~ value.difference * attention.difference * condition + (1 | value.difference * attention.difference || subject), family=binomial)
+## Looking at value.difference against pLeft
 
+![Hello](correlationGraph.png)
 
-### Things to look at
-
-1. Are they completing the strength-of-preference task properly (i.e. not treating it as binary)?
-2. RTs?
-3. Does total RT change depending on block? Depending on task?
-4. Does proportion of time spent staring at stimuli change over time? Over block?
-5. How do you tell calibration? What effect does that have? How do you kick people out based on that?! 
-6. So. Many. Questions. 
-
-
-```{r Analysis}
-
-```
 
 # Experiment running notes
 Participant 6, 9, 11, 14, 15, 24, 26, 34, 42, 47: calibration and validation seemed to go very well, but fixation cross did not work for them.

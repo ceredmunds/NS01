@@ -13,24 +13,18 @@ output:
 rm(list=ls()) 
 
 require(data.table); require(plyr); require(lme4); require(ggplot2); require(MuMIn);
-require(GGally)
+require(GGally); require(stargazer); require(BaylorEdPsych)
 
 require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
 
+# Get data
 fixations <- fread('NS01fixationsLong.csv', stringsAsFactors=F)
-
+badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47) # Wrong eye
+fixations <- fixations[!participantNo %in% badCalib,] # Exclude participants
 ```
 
 # Results
 In total, we have `r length(unique(fixations$participantNo))` participants after excluding those for whom the fixation cross did not work (due to experimenter error) and 2 people for which the eye-tracker would not initially calibrate. 
-
-## Exclusions
-```{r Exclude participants for which I tracked wrong eye, echo=F}
-effedUp <- c(1)
-badCalib <- c(6, 9, 11, 14, 15, 24, 26, 34, 10, 22, 42, 47) # Wrong eye
-
-fixations <- fixations[!participantNo %in% badCalib,]
-```
 
 As preregistered, we excluded participants on the basis of time on task. Time on task was operationalized as the proportion of time during the trial where participants were fixating on either the pictures or the response scale. We then plotted boxplots and histograms of the mean proportion for each participant to determine where a natural break point would be (and to see if any outliers were detected).
 
@@ -124,7 +118,7 @@ This resulted in excluding `r signif(rt.exclusions.by.task[task=="continuous", p
 # Tidying
 rm(binary, binary.summary, binary.summary.plot, binary.histogram, binaryExclusions, 
    continuous, continuous.summary, continuous.summary.plot, continuous.histogram, continuousExclusions, 
-   rt.exclusions, rt.exclusions.by.task, rt.exclusions.by.ppt)
+   rt.exclusions, rt.exclusions.by.task, rt.exclusions.by.ppt, badCalib)
 ```
 
 ## Analysis
@@ -191,7 +185,7 @@ hist(data$response[data$task=="continuous" & data$taskOrder==2])
 ```
 
 
-
+# Considering reaction times
 So, we were interested in whether the interaction effect was greater in the continuous task or in the binary task.
 
 One intuition was that participants might take longer to think in the continuous task than in the binary task and by taking longer to consider their choices, we might get different choices?
@@ -228,9 +222,12 @@ rt4 <- lm(rt ~ attention.difference*value.difference*task ,
 summary(rt4)
 anova(rt3, rt4) # Sig: prefer rt3
 ```
-
 ```{r}
-summary(rt3)
+
+
+
+stargazer(rt3, type="html",
+          title="Summary of coefficients of model predicting reaction time")
 ```
 
 ```{r Checking RT model}
@@ -317,6 +314,10 @@ choice3 <- glmer(recodedResponse ~ attention.difference*value.difference*task +
               control=glmerControl(optimizer="Nelder_Mead"))
 summary(choice3)
 anova(choice3, choice1) # Sig so prefer choice1
+```
+
+```{r}
+stargazer(choice1, type="html")
 ```
 
 ```{r Checking choice model}
@@ -407,17 +408,40 @@ continuous.full.recoded <- glmer(recodedResponse ~ attention.difference*value.di
 summary(continuous.full.recoded)
 
 
-continuous.full <- glmer(response ~ attention.difference*value.difference +
+continuous.full <- lmer(response ~ attention.difference*value.difference +
                        (1 + attention.difference*value.difference|| participantNo),
-                     family="binomial", data=data[task=="continuous",])
+                       data=data[task=="continuous",])
 summary(continuous.full)
 
-cont <- lmer(response ~ attention.difference^2 + (1+attention.difference||participantNo),
-              data=data[task=="continuous"])
-summary(cont)
+stargazer(continuous.full, continuous.full.recoded, type="html",
+          title="Comparing linear probability model, with recoded continuous repsonses.")
 ```
 
 So, it looks like there are main effects of attention and value on choice and main effects of task (as expected), an interaction of choice & attention and a hint of a three way interaction on rts.
+
+# Looking at patterns of attention
+```{r}
+data[, rounded.value.difference:= round(value.difference)]
+
+pData <- dcast(data[!task=="valuation",], participantNo + task + rounded.value.difference ~ recodedResponse, 
+               fun=length, value.var="recodedResponse")
+setnames(pData, c("participantNo", "task", "value.difference", "nLeft", "nRight"))
+pData[, pLeft:=nLeft/(nLeft + nRight)]
+
+pData.summary <- pData[, list(mean=mean(pLeft), sd=sd(pLeft), se=se(pLeft)), by=.(task, value.difference)]
+pData.summary[, `:=`(lower=mean-se, upper=mean+se)]
+
+ggplot(pData.summary, aes(x=value.difference, y=mean, group=task, shape=task, color=task))+
+  geom_point() + 
+  geom_line() +
+  geom_errorbar(aes(ymin = lower, ymax = upper)) +
+  theme_minimal()
+
+```
+
+## Looking at length of fixation by task
+```{r}
+```
 
 # Notes
 So, in this analysis there is a `r signif(cor(data[task!="valuation", value.difference], data[task!="valuation", attention.difference]),3)` correlation between attention difference and value difference: participants seem to look at the higher value option for longer.
