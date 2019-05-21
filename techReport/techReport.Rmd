@@ -1,10 +1,12 @@
 ---
-title: "NS01: Strength-of-preference vs. decisions in binary choice"
-output: html_notebook
+title: 'NS01: Strength-of-preference vs. decisions in binary choice'
 author: "C E R Edmunds"
-date: 5-11-2018
-bibliography: references.bib
+date: "5-11-2018"
+output:
+  html_document:
+    df_print: paged
 csl: apa.csl
+bibliography: references.bib
 ---
 
 ```{r Setup, include=FALSE}
