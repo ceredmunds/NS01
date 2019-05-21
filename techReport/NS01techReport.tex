@@ -1,0 +1,111 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\raggedright % So not straight on both sides
+\setlength{\parindent}{0.5in} % So indent paragraphs
+\usepackage{indentfirst} % So indent first paragraph after a heading
+\usepackage{titlesec}
+\usepackage{authblk}
+\titleformat{\section}[block]{\normalsize \bfseries \filcenter}{}{1em}{}
+\titleformat{\subsection}[block]{\normalsize \bfseries}{}{1em}{}
+\titleformat{\subsubsection}[runin]{\bfseries}{}{}{}[]
+\titlespacing{\subsubsection}{\parindent}{*2}{\wordsep}
+\setcounter{secnumdepth}{0}
+\usepackage{setspace}
+\usepackage{apacite}
+\usepackage{amsmath}
+\usepackage{color} % So can change text colour, helpful for editting
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{graphicx} % So can add pictures
+\usepackage[labelfont=it, labelsep=period]{caption} % So can change figure 1 to italics
+\usepackage{enumitem} % To format lists ok
+
+\usepackage{fancyhdr} % To add headers
+\setlength{\headheight}{15.2pt}
+\pagestyle{fancy}
+\usepackage{lastpage}
+\lhead[NS01]{NS01}
+
+
+\title{NS01: Binary choice vs. strength-of-preference}
+\author{C. E. R. Edmunds}
+\date{}
+\begin{document}
+
+\maketitle
+
+% \newpage
+% \begin{abstract}
+% \end{abstract}
+\doublespacing
+
+\section{Notes}
+People to email results: najmi.husaini@warwick.ac.uk
+
+\section{Rationale}
+
+We are interested in the effects of attention (as measured by time spent looking at an object using eye-tracking) and value (as elicited from the subjects directly via ratings) when determining choices between two objects (such as between two bags of chips, or two pictures of nature, or between two fruits). In previous experiments, we have found that choice is predicted by an interaction of attention and value: people attend to objects they like more and are more likely to choose them. However, in other experiments there are only additively separable effects of attention and value on choice: people are more likely to pick the option they value more and/or they are more likely to choose the option they attend to more, but that these effects do not interact (i.e. looking more does not have a bigger effect when the value difference is bigger). 
+ 
+The current experiment will attempt to identify which properties lead to the interactive vs. additive effect of attention and value. Here, we will compare simple binary choice between two pictures (Would you prefer Picture A or Picture B on your wall?) with a strength of preference comparison (By how much would you prefer Picture A over Picture B, or vice versa?). We hypothesise that the size of the interaction term will be greater in the strength-of-preference condition than in the choice condition. 
+
+\section{Method}
+\subsection{Participants}
+
+Data was collected from $67$ participants: $2$ of these were excluded because the eye-tracker would not initially calibrate and $12$ of these were excluded due to a coding error which meant the fixation cross did not work for them. This resulted in data being collected from $53$ participants. All participants were recruited from the University of Warwick’s volunteer subject pool and paid £10 for their participation.
+
+\subsection{Apparatus}
+The participants were tested individually using an EyeLink 1000 Plus (SR Research, Osgoode, ON, Canada) eye-tracker. Monocular eye movements were recorded at 500Hz and fixations were identified by the eye tracker using velocity algorithms. The Areas of Interest were defined as a rectangle around the image position(s) on the screen. The experiment was displayed on a widescreen monitor (1920 x 1080 resolution, refresh). Participants were placed on a chin rest approximately 70cm away from the screen. Stimulus presentation was controlled by MATLAB using Psychtoolbox extensions \cite{Brainard1997, Pelli1997}.
+% TODO Find refresh rate of screen
+
+\subsection{Design}
+All participants completed binary choice and strength-of-preference tasks in a counterbalanced order, followed by a final valuation task where they had to rate their overall liking for each picture on a Likert scale. 
+
+\subsection{Stimuli and choices}
+The stimuli were chosen from the International Affective Picture System \cite{Lang:2008}. The pictures were all positive in affect (average, male and female ratings between 5=neutral and 7=mildly positive) and had differences in value ratings of no more than 1.5 between male and female raters. After visual inspection, a further 7 images were removed for containing sexual images and 32 images were removed because they had a portrait aspect ratio. The 200 stimuli for each participant were randomly sampled without replacement from the 253 pictures that met these criteria. The participant's choices were generated by pairing the first stimulus with the hundred-and-first, the second with the hundred-and-second and so forth. 
+
+\subsection{Procedure}
+The experiment was displayed on a black background with white text and response scales. At the beginning of the experiment the participants were asked to provide their age and gender. Then, participants completed three tasks: the binary choice task, the strength-of-preference task and the valuation task. The order of the binary choice and strength-of-preference tasks were counterbalanced between participants. For each task, the participants were shown the instructions for the task, then the eye-tracker was calibrated and then they were shown a reminder of the task instructions at which point they had to give a left mouse click to start the task. At the beginning of each trial, a fixation cross was displayed in the center of the screen until the participant had looked at it. 
+
+In both of the choice tasks, two landscape pictures (each 514 x 384px) were displayed side by side after the fixation cross. The response scale was presented horizontally centered, below the stimuli. For the binary choice task, two labels (``Option A'' and ``Option B'') were shown underneath the appropriate stimuli. The current choice was signified by a red, square marker (30 x 30px) above the label. For the strength of preference task, the response scale was a white bar displayed underneath the stimuli that extended from the middle of one stimulus to the middle of the other. A red marker slid along the bar to signify the amount of preference for each option. The end of the scales were marked ``Option A'' and ``Option B.'' In this task participants could move the marker to any point along the line using the mouse. In both tasks, the marker was initially centered equidistant between the two images. To respond in both tasks, the participants had to press the left mouse button. Reaction times were measured from the start of the trial to the beginning of the mouse click (i.e. the program did not wait for the release of the mouse button). A blank, black screen was displayed for $500ms$ between each trial.
+% TODO Work out how far apart the stimuli were in pixels
+
+In the final, valuation task, participants judged how much they liked each picture on a vertical Likert scale (1=strongly dislike, 7=strongly like). Each of the 200 stimuli were displayed once in a random order. Participants were offered the chance to take a self-paced break every 50 stimuli. A blank, black screen was displayed for $500ms$ between each rating. Throughout the experiment, the eye-tracker was validated every 25 trials.
+
+\subsection{Analysis}
+The continuous scale was split into a hundred bins. Areas of interest were defined as the area of the stimulus and a box around the response scales. 
+
+\section{Results}
+
+\subsection{Exclusions}
+One participant was excluded as they spent less than 60\% of the time on task during the binary experiment phase. 
+
+As pre-registered, participants were excluded on a task by task basis. In previous eye-tracking research, we found that some participants spend a considerable amount of time off task, i.e. not looking at either the stimuli or the response scale. Here, only participant was found to be an outlier in the binary task and their data was removed. An outlier here is defined as the average proportion of time across all binary choice trials was less than the first quartile of all participants minus 1.5 times the interquartile range. This left 53 participants. 
+
+We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. 
+
+\subsection{Reaction time}
+
+
+
+\subsection{Choice}
+
+% TODO Last gaze predicts choice?
+
+% TODO Gaze cascade effect?
+
+\section{Discussion}
+
+\section{Open Practices Statement}
+The analysis was pre-registered at \url{AsPredicted.org/19698}. The data and analysis of this experiment is available in the Open Science Framework \url{https://osf.io/xfc8a/}. 
+% TODO Double check links are correct. 
+
+\newpage
+\bibliographystyle{apacite}
+\bibliography{references}
+
+\end{document}
