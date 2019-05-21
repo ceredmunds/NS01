@@ -3,6 +3,9 @@
 .RData
 .Ruserdata
 .DS_Store
+.texpadtmp
+.idea
+venv
 
 *.Rproj
 *.nb.html

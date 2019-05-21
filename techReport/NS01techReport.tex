@@ -89,10 +89,19 @@ As pre-registered, participants were excluded on a task by task basis. In previo
 We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. 
 
 \subsection{Reaction time}
+We estimated a mixed model, with random intercepts and slopes at the level of participant \cite{Barr:2013eh}.
 
+\input{RTmodels.tex}
 
+Response time was longer in the continuous task than in the binary task. 
+
+Additionally, there was an interaction between attention and value. 
 
 \subsection{Choice}
+
+When considering a mixed effects model of choice, we recoded the responses given by the continuous task so that any slight preference towards the right, was signed as ``right'' and the opposite with left. Other ways of completing this analysis, that attempted to take into account the additional information available in the continuous tasks (such as linear probability models) found similar results. 
+
+\input{ChoiceModels}
 
 % TODO Last gaze predicts choice?
 
