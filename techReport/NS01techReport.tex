@@ -88,24 +88,39 @@ As pre-registered, participants were excluded on a task by task basis. In previo
 
 We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. 
 
-\subsection{Reaction time}
-We estimated a mixed model, with random intercepts and slopes at the level of participant \cite{Barr:2013eh}.
+\subsection{Predicting reaction times}
+There was a significant interaction between task order and condition on reaction time, $t(5111)=8.01$, $SE=79.51$, $p<.001$. Participants who completed the continuous task first were faster than those that completed it second, whereas participants who completed the binary task first were slower than those that completed it second (see Figure~\ref{figure:RTblockGraph}). Further, the four-way interaction of task, attention, value with task order was marginal, $t(5099)=1.88$, $SE=139.16$, $p=.060$. So, as preregistered, in the following we only considered information from the first block. 
 
-\input{RTmodels.tex}
+\begin{figure}
+	\centering
+	\includegraphics{images/RTorderEffects.pdf}
+	\caption{Mean reaction times. Error bars are within-subject difference-adjusted confidence intervals \protect\cite{Baguley2012}.}
+	\label{figure:RTblockGraph}
+\end{figure}
 
-Response time was longer in the continuous task than in the binary task. 
+There was a significant variance in reaction time intercepts across participants, $SD=1114.18$ (95\% CI: 900.45, 1378.63), $\chi^2(1)=1375.60$, $p<.001$. Additionally, slopes based on absolute difference in attention significantly varied across participants, $SD=556.09$ (95\% CI: 275.62, 1121.96), $\chi(2)=9.66$, $p=.008$. As did the slopes based on absolute difference in value, $SD=90.54$ (95\% CI: 52.81, 155.24), $\chi(3)=15.26$, $p=.002$. Therefore, the final model included main effects of task, attention and value, with random effects of attention and value. 
+	
+\input{tables/RTmodels.tex}
 
-Additionally, there was an interaction between attention and value. 
+Table~\ref{table:rtModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full reaction time model (see Figure~\ref{figure:RTattentionValueGraph}). In summary, reaction times were significantly predicted by difference in attention, $t(2499)=2.11$, $SE=334.42$, $p=.035$. The greater the difference in amount of attention between the two options, the faster the participant responded. There was also a marginal effect of difference in value, $t(2499)=1.71$, $SE=45.69$, $p=.088$. The greater the difference in value between the choices, the faster participants responded. The main effect of task, the two-way and three-way interactions did not reach significance ($p>=0.316$). 
+
+\begin{figure}
+	\centering
+	\includegraphics{images/RTattentionValueGraph}
+	\caption{}
+	\label{figure:RTattentionValueGraph}
+\end{figure}
 
 \subsection{Choice}
+To consider a mixed effects model of choice, we recoded the responses given in the continuous task as binary. Other ways of completing this analysis, which attempted to take into account the additional information available in the continuous tasks (such as linear probability models), found similar results. 
 
-When considering a mixed effects model of choice, we recoded the responses given by the continuous task so that any slight preference towards the right, was signed as ``right'' and the opposite with left. Other ways of completing this analysis, that attempted to take into account the additional information available in the continuous tasks (such as linear probability models) found similar results. 
+There was no interaction between task and order on choice, $p=.766$. Additionally, a main effects analysis found the four-way interaction was not significant, $p=.999$. Therefore, in the following we disregard order as a main effect and include data from both tasks. 
 
-\input{ChoiceModels}
+There was a significant random effect of difference in attention on choice, $\chi^2(1)=1791.02$, $p<.001$. There was also a random effect of difference in value on choice, $\chi^2(1)=1341.70$, $p<.001$. A random effect of task did not add additional information, $\chi^2(3)=0.46$, $p=.928$. Therefore, the final model included fixed effects of task, attention and value, with random effects of attention and value.
 
-% TODO Last gaze predicts choice?
+\input{tables/choiceModel.tex} 
 
-% TODO Gaze cascade effect?
+Table~\ref{table:choiceModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full choice model. Choice was significantly predicted by attention, $t(1)=12.89$, $SE=0.44$, $p<.001$, and value, $t(1)=14.28$, $SE=0.06$, $p<.001$. The main effect of task, as well as two- and three-way interactions did not reach significance ($p>=.168$).
 
 \section{Discussion}
 

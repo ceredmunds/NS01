@@ -2,8 +2,6 @@
 # C. E. R. Edmunds - Created - 1-2-2019
 
 # Setup --------------------------------------------------------------------------------------------
-rm(list=ls()) # Clear all variables in the workspace
-
 require(data.table)
 
 combine=F
@@ -65,7 +63,11 @@ if (combine){
   fixations[, intra_choice:=ifelse(fixLengthTr>0, 1, 0)]
 
   # Tidy aoi
-  fixations[aoi=="", aoi:=NA]
+  fixations[is.na(aoi), aoi:="out"]
+
+  fixations[, response:=as.double(response)]
+  fixations[task=="binary", response:= response-1]
+  fixations[task=="continuous", response:= (response-1.0)/99.0]
 
   # Write data
   fwrite(fixations, "/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv", row.names=F)
@@ -106,7 +108,7 @@ if (exclusions){
   binaryExclusions <- c(binary.summary.plot[onTaskProp<0.60, participantNo])
 
   # Remove participant
-  fixations <- fixations[!participantNo %in% binaryExclusions,]
+  fixations[, binaryExclusions:=ifelse(participantNo %in% binaryExclusions, 1, 0)]
 
   # Exclusions based on time on task in continuous condition ---------------------------------------
   continuous <- fixations[task=='continuous' & intra_choice==1,]
@@ -133,18 +135,19 @@ if (exclusions){
   # Not really needed, due to lack of exclusions. There in case change mind.
   # Get excluded participant(s)
   continuousExclusions <- c(continuous.summary.plot[onTaskProp<0, participantNo])
-
-  # Remove participant
-  fixations <- fixations[!participantNo %in% continuousExclusions,]
+  fixations[, continuousExclusions:=ifelse(participantNo %in% continuousExclusions, 1, 0)]
 
   #  Exclusions based on reaction times ------------------------------------------------------------
-  fixations[, excludeTrial:= ifelse((rt<200 | rt>mean(rt)+3*sd(rt)) & task!="valuation", 1, 0)]
+  fixations[, rtExclusions:= ifelse((rt<200 | rt>mean(rt)+3*sd(rt)) & task!="valuation", 1, 0)]
 
   # Get break down of exclusions per task and per participant
-  rt.exclusions <- fixations[task!="valuation", list(excludeN=sum(excludeTrial)/.N),
+  rt.exclusions <- fixations[task!="valuation", list(excludeN=sum(rtExclusions)/.N),
                              by=list(participantNo, trial, task)]
   rt.exclusions.by.task <- rt.exclusions[, list(propExclude=sum(excludeN)/.N), by=task]
   rt.exclusions.by.ppt <- rt.exclusions[, list(propExclude=sum(excludeN)/.N), by=.(participantNo)]
+
+  # All exclusions
+  fixations[, exclude:=ifelse(binaryExclusions + continuousExclusions + rtExclusions>0, 1, 0)]
 
   rm(binary, binary.summary, binary.summary.plot, binaryExclusions,
      continuous, continuous.summary, continuous.summary.plot, continuousExclusions, badCalib)

@@ -123,7 +123,6 @@ summary(rePCA(rt)) # 2/4 components have variance greater than 1%
 rt1 <- lmer(rt ~ attention.difference*value.difference*task + 
              (1 + attention.difference*value.difference - value.difference||participantNo), 
           data=data[task!="valuation"], REML=F, control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt1)
 summary(rePCA(rt1)) # 2/3 have variance>1%
 anova(rt, rt1) # N.s. prefer rt1
 
@@ -131,21 +130,18 @@ anova(rt, rt1) # N.s. prefer rt1
 rt2 <- lmer(rt ~ attention.difference*value.difference*task + 
              (1 + attention.difference ||participantNo), 
           data=data[task!="valuation"], REML=F, control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt2)
 anova(rt1, rt2) # N.s. prefer rt2
 
 rt3 <- lmer(rt ~ attention.difference*value.difference*task + 
              (1|participantNo), 
           data=data[task!="valuation"], REML=F, control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt3)
 anova(rt2, rt3) # N.s prefer rt3
 
 rt4 <- lm(rt ~ attention.difference*value.difference*task , 
           data=data[task!="valuation"])
-summary(rt4)
 anova(rt3, rt4) # Sig: prefer rt3
 ```
-```{r}
+```{r, results="hide"}
 full <- lmer(rt ~ attention.difference*value.difference*task + 
              (1|participantNo), 
           data=data[task!="valuation"], REML=F, control=lmerControl(optimizer="Nelder_Mead"))
@@ -178,7 +174,7 @@ stargazer(full, type="latex",
           title="Summary of coefficients of model predicting reaction time",
           covariate.labels=c("Attention", "Value", "Task", "Attention*Value",
                              "Attention*Task", "Value*Task", "Attention*Value*Task"),
-          ci=T, out="../techReport/RTmodels.tex")
+          ci=T, out="../techReport/tables/RTmodels.tex")
 ```
 
 ```{r Checking RT model}
@@ -268,7 +264,7 @@ anova(choice3, choice1) # Sig so prefer choice1
 ```
 
 ```{r}
-stargazer(choice1, type="latex", out="../techReport/Choicemodels.tex",
+stargazer(choice1, type="latex", out="../techReport/tables/Choicemodels.tex",
           title="Summary of coefficients of model predicting choice",
           covariate.labels=c("Attention", "Value", "Task", "Attention*Value",
                              "Attention*Task", "Value*Task", "Attention*Value*Task"), 
