@@ -1,0 +1,15 @@
+NS01 notes -*- mode: org -*-
+#+STARTUP: showall
+
+* Tasks
+** DONE Write up reaction time results in LaTeX
+** TODO Write up choice results in LaTeX
+** TODO Last gaze predicts choice?
+** TODO Gaze cascade effect?
+** TODO Proof read tech file
+** TODO Email to everyone
+** TODO Double check links are correct. 
+
+* Files
++ [[~/NS01/techReport/NS01techReport.tex][Tech report]] :: Write up of rationale, method and results (so far). 
+
