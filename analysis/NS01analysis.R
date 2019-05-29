@@ -3,8 +3,8 @@
 ## Setup -------------------------------------------------------------------------------------------
 rm(list=ls())
 
-require(data.table); require(plyr); require(nlme); require(ggplot2); require(MuMIn);
-require(GGally); require(stargazer); require(BaylorEdPsych)
+require(data.table); require(plyr); require(ggplot2); require(MuMIn);
+require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4)
 
 require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
 
@@ -31,8 +31,8 @@ data[, `:=`(participantNo=factor(participantNo), task=factor(task))]
 
 ## Reaction times ----------------------------------------------------------------------------------
 # Order effects
-rt.order <- gls(rt ~ task*taskOrder, data=data[task!="valuation",], method="ML")
-rt.order.all <- gls(rt ~ task*taskOrder*attention.difference*value.difference,
+rt.order <- lm(rt ~ task*taskOrder, data=data[task!="valuation",], method="ML")
+rt.order.all <- lm(rt ~ task*taskOrder*attention.difference*value.difference,
                     data=data[task!="valuation",], method="ML")
 
 rt.task.1 <-  gls(rt ~ task, data=data[task!="valuation" & block==1,], method="ML")
@@ -66,33 +66,31 @@ ggsave('../techReport/images/RTorderEffects.pdf', height=3.5, width=4, units="in
 
 # Considering random effects
 # Intercept only
-rt.intercept.only <- gls(rt ~ 1, data=data[task!="valuation" & block==1,], method="ML")
+rt.intercept.only <- lm(rt ~ 1, data=data[task!="valuation" & block==1,], method="ML")
 
 # Random intercepts
-rt.random.intercept.only <- lme(rt ~ 1, random = ~1|participantNo,
+rt.random.intercept.only <- lmer(rt ~ 1 + 1|participantNo,
                                 data=data[task!="valuation" & block==1,], method="ML")
 
 # Random intercepts and slopes based on attention
-rt.random.intercept.slope.att <- lme(rt ~ 1,
-                                          random = ~abs(attention.difference)|participantNo,
+rt.random.intercept.slope.att <- lmer(rt ~ 1 + abs(attention.difference)||participantNo,
                                           data=data[task!="valuation" & block==1,], method="ML")
 
 # Random intercepts and slopes based on attention and value
-rt.random.intercept.slope.att.val <- lme(rt ~ 1,
-                                     random = ~abs(attention.difference)+abs(value.difference)|participantNo,
+rt.random.intercept.slope.att.val <- lmer(rt ~ 1 + abs(attention.difference)+abs(value.difference)||participantNo,
                                      data=data[task!="valuation" & block==1,], method="ML")
 
 # Comparing random models
-anova(rt.intercept.only, rt.random.intercept.only, rt.random.intercept.slope.att,
+anova(rt.random.intercept.only, rt.intercept.only, rt.random.intercept.slope.att,
       rt.random.intercept.slope.att.val)
 
 # Full model (i.e. including fixed effects)
-rt.full <- lme(rt ~ task*abs(attention.difference)*abs(value.difference),
-               random = ~abs(attention.difference)+abs(value.difference)|participantNo,
+rt.full <- lmer(rt ~ task*abs(attention.difference)*abs(value.difference) +
+                  (abs(attention.difference) + abs(value.difference)||participantNo),
                data=data[task!="valuation" & block==1,], method="ML",
-               control=lmeControl(maxIter=1000, msMaxIter=1000, opt="optim"))
+               control=lmerControl(optimizer="Nelder_Mead"))
 summary(rt.full) # Model summary
-intervals(rt.full) # Get 0.95 confidence intervals
+confint(rt.full) # Get 0.95 confidence intervals
 stargazer(rt.full, type="latex",
   title="Summary of coefficients of model predicting reaction time",
   covariate.labels=c("Task", "Attention", "Value", "Task:Attention", "Task:Value",
@@ -135,8 +133,11 @@ choice.order <- glm(recodedResponse ~ task*taskOrder, data=data[task!="valuation
                     family="binomial")
 choice.order.all <- glm(recodedResponse ~ task*taskOrder*attention.difference*value.difference,
                         data=data[task!="valuation"], family="binomial")
-require("lme4")
+
 # Random intercepts
+choice.intercept.only <- glm(recodedResponse ~ 1,
+                              data=data[task!="valuation",], family="binomial")
+
 choice.random.intercept.only <- glmer(recodedResponse ~ 1 + 1|participantNo,
                                     data=data[task!="valuation",], family="binomial",
                                     control=glmerControl(optimizer="Nelder_Mead"))
