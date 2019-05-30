@@ -368,7 +368,6 @@ stargazer(continuous.full, continuous.full.recoded, type="html",
           title="Comparing linear probability model, with recoded continuous repsonses.")
 ```
 
-So, it looks like there are main effects of attention and value on choice and main effects of task (as expected), an interaction of choice & attention and a hint of a three way interaction on rts.
 
 # Looking at patterns of attention
 ```{r}

@@ -146,7 +146,9 @@ choice.random.intercept.slope.att <- glmer(recodedResponse ~ (attention.differen
                                       data=data[task!="valuation",], family="binomial",
                                       control=glmerControl(optimizer="Nelder_Mead"))
 
-choice.random.intercept.slope.att.value <- glmer(recodedResponse ~ (attention.difference +  value.difference)||participantNo,
+choice.random.intercept.slope.att.value <- glmer(recodedResponse ~
+                                                 (attention.difference +
+                                                    value.difference)||participantNo,
                                            data=data[task!="valuation",], family="binomial",
                                            control=glmerControl(optimizer="Nelder_Mead"))
 
@@ -162,7 +164,8 @@ anova(choice.random.intercept.only, choice.random.intercept.slope.att,
 choice.full <- glmer(recodedResponse ~ task*attention.difference*value.difference +
                       (1 + attention.difference + value.difference||participantNo),
                     data=data[task!="valuation",], family="binomial",
-                    control=glmerControl(optimizer="Nelder_Mead", check.conv.grad=.makeCC("warning", tol=1e-1)))
+                    control=glmerControl(optimizer="Nelder_Mead",
+                                         check.conv.grad=.makeCC("warning", tol=1e-1)))
 summary(choice.full) # Model summary
 confint(choice.full, method="Wald") # Get 0.95 confidence intervals
 stargazer(choice.full, type="latex",
@@ -171,3 +174,77 @@ stargazer(choice.full, type="latex",
                              "Attention:Value", "Task:Attention:Value"),
           out="../techReport/tables/choiceModel.tex", style="default", ci=T, single.row=T,
           label="table:choiceModel", table.placement="!b") # Print table to file
+
+# Number of fixations ------------------------------------------------------------------------------
+nFixData <- dcast(fixations[task!="valuation"], participantNo + task + trial ~ aoi, fun=length, value.var="aoi")
+nFixData[, relativeFixN:= right/(left+right)]
+data <- merge(data, nFixData, by=c("participantNo", "task", "trial"))
+
+# Random intercepts
+fixN.intercept.only <- lm(relativeFixN ~ 1, data=data[task!="valuation",])
+
+fixN.random.intercept.only <- lmer(relativeFixN ~ 1 + 1|participantNo,
+                                   data=data[task!="valuation",],
+                                   control=lmerControl(optimizer="Nelder_Mead"))
+
+fixN.random.intercept.slope.att <- lmer(relativeFixN ~ (attention.difference)||participantNo,
+                                        data=data[task!="valuation",],
+                                        control=lmerControl(optimizer="Nelder_Mead"))
+# Singular...
+fixN.random.intercept.slope.value <- lmer(relativeFixN ~ (value.difference)||participantNo,
+                                          data=data[task!="valuation",],
+                                          control=lmerControl(optimizer="Nelder_Mead"))
+fixN.random.intercept.slope.task <- lmer(relativeFixN ~ (task)||participantNo,
+                                              data=data[task!="valuation",],
+                                              control=lmerControl(optimizer="Nelder_Mead"))
+
+anova(fixN.random.intercept.only, fixN.intercept.only, fixN.random.intercept.slope.att)
+
+
+fix.duration.model <- lmer(relativeFixN ~ task*attention.difference*value.difference +
+                             (1|participantNo),
+                           data=data[task!="valuation",])
+summary(fix.duration.model)
+stargazer(fix.duration.model, type="latex",
+          title="Summary of coefficients of model predicting number of fixations on each choice",
+          covariate.labels=c("Task", "Attention", "Value", "Task:Attention", "Task:Value",
+                             "Attention:Value", "Task:Attention:Value"),
+          out="../techReport/tables/nFixModel.tex", style="default", ci=T, single.row=T,
+          label="table:nFixModel", table.placement="!b") # Print table to file
+
+# Duration of fixations ----------------------------------------------------------------------------
+durData <- dcast(fixations[task!="valuation"], participantNo + task + trial ~ aoi, fun=mean, value.var="fixLengthTr")
+durData[, relativeFixDur:= right/(left+right)]
+data <- merge(data, durData, by=c("participantNo", "task", "trial"))
+
+# Random effects
+fixD.intercept.only <- lm(relativeFixDur ~ 1, data=data[task!="valuation",])
+
+fixD.random.intercept.only <- lmer(relativeFixDur ~ 1 + 1|participantNo,
+                                   data=data[task!="valuation",],
+                                   control=lmerControl(optimizer="Nelder_Mead"))
+
+fixD.random.intercept.slope.value <- lmer(relativeFixDur ~ (value.difference)||participantNo,
+                                          data=data[task!="valuation",],
+                                          control=lmerControl(optimizer="Nelder_Mead"))
+# Singular...
+fixD.random.intercept.slope.att <- lmer(relativeFixDur ~ (attention.difference)||participantNo,
+                                        data=data[task!="valuation",],
+                                        control=lmerControl(optimizer="Nelder_Mead"))
+
+fixD.random.intercept.slope.task <- lmer(relativeFixDur ~ (task)||participantNo,
+                                         data=data[task!="valuation",],
+                                         control=lmerControl(optimizer="Nelder_Mead"))
+
+anova(fixD.random.intercept.only, fixD.intercept.only, fixD.random.intercept.slope.value)
+
+
+fix.duration.model <- lm(relativeFixDur ~ attention.difference*value.difference*task,
+                           data=data[task!="valuation",])
+summary(fix.duration.model)
+stargazer(fix.duration.model, type="latex",
+          title="Summary of coefficients of model predicting duration of time on options",
+          covariate.labels=c("Task", "Attention", "Value", "Task:Attention", "Task:Value",
+                             "Attention:Value", "Task:Attention:Value"),
+          out="../techReport/tables/durFixModel.tex", style="default", ci=T, single.row=T,
+          label="table:durFixModel", table.placement="!b") # Print table to file
