@@ -24,10 +24,17 @@
 \usepackage{graphicx} % So can add pictures
 \usepackage[labelfont=it, labelsep=period]{caption} % So can change figure 1 to italics
 \usepackage{enumitem} % To format lists ok
+\usepackage{rotating}
 
 \usepackage{fancyhdr} % To add headers
-\setlength{\headheight}{15.2pt}
+\fancyhf{}
+\fancyhead[LO]{\iffloatpage{}{\nouppercase\rightmark}}
+\fancyhead[RE]{\iffloatpage{}{\nouppercase\leftmark}}
+\fancyhead[RO,LE]{\iffloatpage{}{\thepage}}
+\renewcommand{\headrulewidth}{\iffloatpage{0pt}{0.4pt}}
+\renewcommand{\footrulewidth}{0pt}
 \pagestyle{fancy}
+
 \usepackage{lastpage}
 \lhead[NS01]{NS01}
 
@@ -48,6 +55,10 @@
 People to email results: najmi.husaini@warwick.ac.uk
 
 \section{Rationale}
+
+EQ4D
+
+average number of fixations per picture?
 
 We are interested in the effects of attention (as measured by time spent looking at an object using eye-tracking) and value (as elicited from the subjects directly via ratings) when determining choices between two objects (such as between two bags of chips, or two pictures of nature, or between two fruits). In previous experiments, we have found that choice is predicted by an interaction of attention and value: people attend to objects they like more and are more likely to choose them. However, in other experiments there are only additively separable effects of attention and value on choice: people are more likely to pick the option they value more and/or they are more likely to choose the option they attend to more, but that these effects do not interact (i.e. looking more does not have a bigger effect when the value difference is bigger). 
  
@@ -86,7 +97,7 @@ One participant was excluded as they spent less than 60\% of the time on task du
 
 As pre-registered, participants were excluded on a task by task basis. In previous eye-tracking research, we found that some participants spend a considerable amount of time off task, i.e. not looking at either the stimuli or the response scale. Here, only participant was found to be an outlier in the binary task and their data was removed. An outlier here is defined as the average proportion of time across all binary choice trials was less than the first quartile of all participants minus 1.5 times the interquartile range. This left 53 participants. 
 
-We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. 
+We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. There was no difference in the models if we included the information from all trials (see Appendix}. 
 
 \subsection{Operationalizing attention and value}
 Before proceeding to the analysis, a quick note on the measures we constructed and used in the mixed random effects models below. Value was incorporated in the models as ``difference in value'' 
@@ -165,6 +176,8 @@ Including random effects did not improve the explanatory power of this model. Fu
 
 \input{tables/durFixModel.tex}
 
+\clearpage
+\newpage
 \subsection{Looking at different ways of operationalizing attention}
 In the above analyses, attention was operationalized as 
 
@@ -186,8 +199,9 @@ Also, CERE noticed that participants appear to spend more time looking at the Li
 	\frac{T_\text{right}-T_\text{left}}{T_\text{right}+T_\text{left}+T_\text{likert}}
 \end{equation}
 is a measure of difference of attention normalised by time spent on task. 
-
 \input{tables/choiceModelAttention.tex}
+
+\input{tables/rtModelAttention.tex}
 
 Mainly because (as shown in Figure~\ref{figure:attentionCorrelations}) they all correlate pretty perfectly. 
 
@@ -198,12 +212,42 @@ Mainly because (as shown in Figure~\ref{figure:attentionCorrelations}) they all 
 	\label{figure:attentionCorrelations}
 \end{figure}
 
-\section{Discussion}
+\clearpage
+\section{Overall value}
 
+\citeA{Smith:2018iz} looked at overall value along with value difference to predict reaction time using the model:
+
+\begin{equation}
+	\log(RT) \sim \beta_0 + \beta_1|V_\text{left} - V_\text{right}| + \beta_2(V_\text{left} + V_\text{right})
+\end{equation}
+where $V_i$ is the subjective value of option $i$. I do a similar thing below. Using this model, we fail to replicate their findings. In this experiment, there is a main effect of absolute difference in value ($\Delta_V$), $\beta_1=-75.24$, $t=3.53$, $SE=21.32$, $p<.001$. In other words, the greater the difference in value between the choices, the faster participants were. However, there is no main effect of total value, $\beta_2=11.39$, $t=0.85$, $SE=13.36$, $p=.394$.
+
+\input{tables/rtModelSmithTask.tex}
+
+Of course, using this model is silly because this collapses across tasks. Therefore, we also ran a linear model that looked at $\Delta_V$, total value and task on reaction time in the first block (see Table~\ref{table:rtModelSmithTask}). Here, we just found a main effect of task, $t=2.00$, $SE=360.37$, $p=.046$.
+
+
+\clearpage
 \section{Open Practices Statement}
 The analysis was pre-registered at \url{AsPredicted.org/19698}. The data and analysis of this experiment is available in the Open Science Framework \url{https://osf.io/xfc8a/}. 
 
 
+
+
+\clearpage
+\section{Appendix}
+\subsection{Choice model including all trials}
+Here, we consider the model of choice including all trials (i.e. no exclusions based on reaction time) for the first block. The model for the second block is similar. 
+
+There was a significant random effect of difference in attention on choice, $\chi^2(1)=985.41$, $p<.001$. There was also a random effect of difference in value on choice, $\chi^2(1)=569.79$, $p<.001$. A random effect of task did not add additional information, $\chi^2(3)=0.02$, $p=.999$. Therefore, the final model included fixed effects of task, attention and value, with random effects of attention and value.
+
+\input{tables/choiceModelAllTrials.tex}
+
+Table~\ref{table:choiceModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full choice model. Choice was significantly predicted by attention, $t(1)=8.90$, $SE=0.72$, $p<.001$, and value, $t(1)=9.73$, $SE=0.10$, $p<.001$. In other words, the picture that was looked at more was more likely to be picked, as was the picture that the participant preferred. The main effect of task, as well as two- and three-way interactions did not reach significance ($p>=.237$).
+
+
+
+\clearpage
 \newpage
 \bibliographystyle{apacite}
 \bibliography{references}
