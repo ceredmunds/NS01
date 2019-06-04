@@ -1,16 +1,16 @@
 NS01 notes -*- mode: org -*-
 #+STARTUP: showall
 
-* Tasks
+* Tasks (analysis) 
 ** DONE Write up reaction time results in LaTeX
 ** DONE Write up choice results in LaTeX
 ** DONE Does task, attention or value predict number of fixations?
 ** DONE Does task, attention or value predict the length of fixations?
+** DONE Compare models with attention measured using different numerators
+** TODO Look to see whether order effect in number of fixations
+** TODO Look to see whether order effect in length of fixations
 ** TODO Last gaze predicts choice?
 ** TODO Gaze cascade effect?
-** TODO Proof read tech file
-** TODO Email to everyone
-** TODO Double check links are correct. 
 
 * Files
 + [[~/NS01/analysis/NS01analysis.R][Analysis file]] :: Most up-to-date analysis

@@ -23,6 +23,11 @@ data <- dcast(fixations, participantNo + task + taskOrder + block + trial + resp
 data[, value.difference:=rValue-lValue]
 data[, attention.difference:=right-left]
 
+# Different types of attention
+data[, attentionByOptions:=(right-left)/(right+left)]
+data[, attentionByTimeOnTask:=(right-left)/(right+left+likertHorizontal)]
+
+
 # Recode responses to get binary responses from continuous task
 data[, recodedResponse:= response]
 data[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
@@ -66,19 +71,19 @@ ggsave('../techReport/images/RTorderEffects.pdf', height=3.5, width=4, units="in
 
 # Considering random effects
 # Intercept only
-rt.intercept.only <- lm(rt ~ 1, data=data[task!="valuation" & block==1,], method="ML")
+rt.intercept.only <- lm(rt ~ 1, data=data[task!="valuation" & block==1,])
 
 # Random intercepts
 rt.random.intercept.only <- lmer(rt ~ 1 + 1|participantNo,
-                                data=data[task!="valuation" & block==1,], method="ML")
+                                data=data[task!="valuation" & block==1,], REML=F)
 
 # Random intercepts and slopes based on attention
 rt.random.intercept.slope.att <- lmer(rt ~ 1 + abs(attention.difference)||participantNo,
-                                          data=data[task!="valuation" & block==1,], method="ML")
+                                          data=data[task!="valuation" & block==1,], REML=F)
 
 # Random intercepts and slopes based on attention and value
 rt.random.intercept.slope.att.val <- lmer(rt ~ 1 + abs(attention.difference)+abs(value.difference)||participantNo,
-                                     data=data[task!="valuation" & block==1,], method="ML")
+                                     data=data[task!="valuation" & block==1,], REML=F)
 
 # Comparing random models
 anova(rt.random.intercept.only, rt.intercept.only, rt.random.intercept.slope.att,
@@ -93,38 +98,51 @@ summary(rt.full) # Model summary
 confint(rt.full) # Get 0.95 confidence intervals
 stargazer(rt.full, type="latex",
   title="Summary of coefficients of model predicting reaction time",
-  covariate.labels=c("Task", "Attention", "Value", "Task:Attention", "Task:Value",
-                     "Attention:Value", "Task:Attention:Value"),
+  covariate.labels=c("Task", "$\\vert\\Delta_A\\vert$", "$\\vert\\Delta_V\\vert$",
+                     "Task : $\\vert\\Delta_A\\vert$", "Task : $\\vert\\Delta_V\\vert$",
+                     "$\\vert\\Delta_A\\vert$ : $\\vert\\Delta_V\\vert$",
+                     "Task : $\\vert\\Delta_A\\vert$ :  $\\vert\\Delta_V\\vert$"),
   out="../techReport/tables/RTmodels.tex", style="default", ci=T, single.row=T,
-  label="table:rtModel", table.placement="!b") # Print table to file
+  label="table:rtModel", table.placement="t",
+  notes="\\footnotesize $\\vert\\Delta_A\\vert$ = absolute attention difference; $\\vert\\Delta_V\\vert$ = absolute value difference; ",
+  notes.append=F, notes.align="l") # Print table to file
 
 # Graph of attention and value on reaction time (think by quartiles)
-choice.graph.data <- data[task!="valuation" & block==1,]
-choice.graph.data[, att.quartile:= cut(abs(attention.difference),
+rt.graph.data <- data[task!="valuation" & block==1,]
+rt.graph.data[, att.quartile:= cut(abs(attention.difference),
                                        quantile(abs(attention.difference), probs=0:4/4),
                                        include.lowest=TRUE, labels=FALSE),
                   by=task]
-choice.graph.data[, abs.value:=abs(value.difference)]
-choice.graph.summary.data <- dcast(choice.graph.data, task + att.quartile + abs.value ~ .,
+rt.graph.data[, abs.value:=abs(value.difference)]
+rt.graph.summary.data <- dcast(rt.graph.data, task + att.quartile + abs.value ~ .,
                                    fun=mean, value.var="rt")
-colnames(choice.graph.summary.data)[4] <- "rt"
+colnames(rt.graph.summary.data)[4] <- "rt"
+
+rt.graph.summary.data <- rt.graph.data[, .(meanRT=mean(rt), sd=sd(rt), N=.N), by=.(task, att.quartile, abs.value)]
+rt.graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
+
+rt.graph.summary.data <- rt.graph.summary.data[abs.value%%1==0,]
 
 # New facet label names for task variable
 task.labs <- c("Binary choice", "Strength-of-preference")
 names(task.labs) <- c("binary", "continuous")
 
-ggplot(choice.graph.summary.data, aes(x=att.quartile, y=rt, group=abs.value)) +
-  geom_point(aes(color=abs.value)) +
-  geom_line(aes(color=abs.value)) +
+ggplot(rt.graph.summary.data, aes(group=att.quartile, y=meanRT, x=abs.value)) +
+  geom_point(aes(color=att.quartile), position=position_dodge(width=0.5)) +
+  geom_line(aes(color=att.quartile), position=position_dodge(width=0.5)) +
+  geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=att.quartile),
+                position=position_dodge(width=0.5)) +
   facet_grid(. ~ task,
              labeller=labeller(task=task.labs)) +
-  labs(x="Attention quartiles", y="Reaction time (ms)", color="Attention \ndifference") +
+  labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
   theme_bw() +
   coord_cartesian(ylim=c(0, 8000)) +
-  scale_color_gradientn(colours = rainbow(7)) +
+  scale_color_gradientn(colours = rainbow(4)) +
   theme(legend.background = element_rect(size=0.2, linetype="solid",
                                          colour ="black"))
 ggsave('../techReport/images/RTattentionValueGraph.pdf', height=3.5, width=6, units="in")
+
+# Data and model fit graph -- Ask Neil
 
 ## Choice ------------------------------------------------------------------------------------------
 # Considering random effects
@@ -163,17 +181,21 @@ anova(choice.random.intercept.only, choice.random.intercept.slope.att,
 
 choice.full <- glmer(recodedResponse ~ task*attention.difference*value.difference +
                       (1 + attention.difference + value.difference||participantNo),
-                    data=data[task!="valuation",], family="binomial",
+                    data=data[task!="valuation" & block==1,], family="binomial",
                     control=glmerControl(optimizer="Nelder_Mead",
                                          check.conv.grad=.makeCC("warning", tol=1e-1)))
 summary(choice.full) # Model summary
 confint(choice.full, method="Wald") # Get 0.95 confidence intervals
 stargazer(choice.full, type="latex",
           title="Summary of coefficients of model predicting choice",
-          covariate.labels=c("Task", "Attention", "Value", "Task:Attention", "Task:Value",
-                             "Attention:Value", "Task:Attention:Value"),
+          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+                             "$\\Delta_A$ : $\\Delta_V$",
+                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
           out="../techReport/tables/choiceModel.tex", style="default", ci=T, single.row=T,
-          label="table:choiceModel", table.placement="!b") # Print table to file
+          label="table:choiceModel", table.placement="!b",
+          notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
+          notes.append=F, notes.align="l") # Print table to file
 
 # Number of fixations ------------------------------------------------------------------------------
 nFixData <- dcast(fixations[task!="valuation"], participantNo + task + trial ~ aoi, fun=length, value.var="aoi")
@@ -201,16 +223,20 @@ fixN.random.intercept.slope.task <- lmer(relativeFixN ~ (task)||participantNo,
 anova(fixN.random.intercept.only, fixN.intercept.only, fixN.random.intercept.slope.att)
 
 
-fix.duration.model <- lmer(relativeFixN ~ task*attention.difference*value.difference +
+fixN.model <- lmer(relativeFixN ~ task*attention.difference*value.difference +
                              (1|participantNo),
-                           data=data[task!="valuation",])
-summary(fix.duration.model)
-stargazer(fix.duration.model, type="latex",
+                           data=data[task!="valuation" & block==1,])
+summary(fixN.model)
+stargazer(fixN.model, type="latex",
           title="Summary of coefficients of model predicting number of fixations on each choice",
-          covariate.labels=c("Task", "Attention", "Value", "Task:Attention", "Task:Value",
-                             "Attention:Value", "Task:Attention:Value"),
+          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+                             "$\\Delta_A$ : $\\Delta_V$",
+                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
           out="../techReport/tables/nFixModel.tex", style="default", ci=T, single.row=T,
-          label="table:nFixModel", table.placement="!b") # Print table to file
+          label="table:nFixModel", table.placement="!b",
+          notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
+          notes.append=F, notes.align="l") # Print table to file
 
 # Duration of fixations ----------------------------------------------------------------------------
 durData <- dcast(fixations[task!="valuation"], participantNo + task + trial ~ aoi, fun=mean, value.var="fixLengthTr")
@@ -239,12 +265,56 @@ fixD.random.intercept.slope.task <- lmer(relativeFixDur ~ (task)||participantNo,
 anova(fixD.random.intercept.only, fixD.intercept.only, fixD.random.intercept.slope.value)
 
 
-fix.duration.model <- lm(relativeFixDur ~ attention.difference*value.difference*task,
-                           data=data[task!="valuation",])
+fix.duration.model <- lm(relativeFixDur ~ task*attention.difference*value.difference,
+                           data=data[task!="valuation" & block==1,])
 summary(fix.duration.model)
 stargazer(fix.duration.model, type="latex",
           title="Summary of coefficients of model predicting duration of time on options",
+          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+                             "$\\Delta_A$ : $\\Delta_V$",
+                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
+          out="../techReport/tables/durFixModel.tex", style="default", ci=T, single.row=T,
+          notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
+          label="table:durFixModel", table.placement="!b",
+          notes.append=F, notes.align="l") # Print table to file
+
+# Looking at other metrics of attention ------------------------------------------------------------
+dcast(data[task!="valuation",], task ~ ., fun = mean, value.var="likertHorizontal.x")
+
+data[, attention:=attention.difference]
+choice.full <- glmer(recodedResponse ~ task*attention*value.difference +
+                       (1 + attention + value.difference||participantNo),
+                     data=data[task!="valuation",], family="binomial",
+                     control=glmerControl(optimizer="Nelder_Mead",
+                                          check.conv.grad=.makeCC("warning", tol=1e-1)))
+summary(choice.full) # Model summary
+confint(choice.full, method="Wald") # Get 0.95 confidence intervals
+
+data[, attention:=attentionByOptions]
+choice.full.options <- glmer(recodedResponse ~ task*attention*value.difference +
+                               (1 + attention + value.difference||participantNo),
+                             data=data[task!="valuation",], family="binomial",
+                             control=glmerControl(optimizer="Nelder_Mead",
+                                                  check.conv.grad=.makeCC("warning", tol=1e-1)))
+summary(choice.full.options)
+
+data[, attention:=attentionByTimeOnTask]
+choice.full.on.task<- glmer(recodedResponse ~ task*attention*value.difference +
+                               (1 + attention + value.difference||participantNo),
+                             data=data[task!="valuation",], family="binomial",
+                             control=glmerControl(optimizer="Nelder_Mead",
+                                                  check.conv.grad=.makeCC("warning", tol=1e-1)))
+summary(choice.full.on.task)
+
+stargazer(choice.full, choice.full.options, choice.full.on.task, type="latex",
+          title="Summary of coefficients of model predicting choice, comparing different attentions",
           covariate.labels=c("Task", "Attention", "Value", "Task:Attention", "Task:Value",
                              "Attention:Value", "Task:Attention:Value"),
-          out="../techReport/tables/durFixModel.tex", style="default", ci=T, single.row=T,
-          label="table:durFixModel", table.placement="!b") # Print table to file
+          column.labels=c("by reaction time", "by time on choices", "by time on task"),
+          out="../techReport/tables/choiceModelAttention.tex", style="default", ci=T, single.row=T,
+          label="table:choiceModelAttention", table.placement="!b") # Print table to file
+
+ggpairs(data[task!="valuation", c("attention.difference", "attentionByOptions", "attentionByTimeOnTask")],
+        title="Correlations between attentions.")
+ggsave('../techReport/images/attentionCorrelations.pdf', height=5, width=5, units="in")

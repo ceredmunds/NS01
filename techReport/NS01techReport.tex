@@ -71,7 +71,7 @@ The stimuli were chosen from the International Affective Picture System \cite{La
 \subsection{Procedure}
 The experiment was displayed on a black background with white text and response scales. At the beginning of the experiment the participants were asked to provide their age and gender. Then, participants completed three tasks: the binary choice task, the strength-of-preference task and the valuation task. The order of the binary choice and strength-of-preference tasks were counterbalanced between participants. For each task, the participants were shown the instructions for the task, then the eye-tracker was calibrated and then they were shown a reminder of the task instructions at which point they had to give a left mouse click to start the task. At the beginning of each trial, a fixation cross was displayed in the center of the screen until the participant had looked at it. 
 
-In both of the choice tasks, two landscape pictures (each 514 x 384px) were displayed side by side after the fixation cross. The response scale was presented horizontally centered, below the stimuli. For the binary choice task, two labels (``Option A'' and ``Option B'') were shown underneath the appropriate stimuli. The current choice was signified by a red, square marker (30 x 30px) above the label. For the strength of preference task, the response scale was a white bar displayed underneath the stimuli that extended from the middle of one stimulus to the middle of the other. A red marker slid along the bar to signify the amount of preference for each option. The end of the scales were marked ``Option A'' and ``Option B.'' In this task participants could move the marker to any point along the line using the mouse. In both tasks, the marker was initially centered equidistant between the two images. To respond in both tasks, the participants had to press the left mouse button. Reaction times were measured from the start of the trial to the beginning of the mouse click (i.e. the program did not wait for the release of the mouse button). A blank, black screen was displayed for $500ms$ between each trial.
+In both of the choice tasks, two landscape pictures (each $514 x 384px$) were displayed side by side after the fixation cross. The response scale was presented horizontally centered, below the stimuli. For the binary choice task, two labels (``Option A'' and ``Option B'') were shown underneath the appropriate stimuli. The current choice was signified by a red, square marker ($30 x 30px$) above the label. For the strength of preference task, the response scale was a white bar displayed underneath the stimuli that extended from the middle of one stimulus to the middle of the other. A red marker slid along the bar to signify the amount of preference for each option. The end of the scales were marked ``Option A'' and ``Option B.'' In this task participants could move the marker to any point along the line using the mouse. In both tasks, the marker was initially centered equidistant between the two images. To respond in both tasks, the participants had to press the left mouse button. Reaction times were measured from the start of the trial to the beginning of the mouse click (i.e. the program did not wait for the release of the mouse button). A blank, black screen was displayed for $500ms$ between each trial.
 % TODO Work out how far apart the stimuli were in pixels
 
 In the final, valuation task, participants judged how much they liked each picture on a vertical Likert scale (1=strongly dislike, 7=strongly like). Each of the 200 stimuli were displayed once in a random order. Participants were offered the chance to take a self-paced break every 50 stimuli. A blank, black screen was displayed for $500ms$ between each rating. Throughout the experiment, the eye-tracker was validated every 25 trials.
@@ -89,15 +89,17 @@ As pre-registered, participants were excluded on a task by task basis. In previo
 We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. 
 
 \subsection{Operationalizing attention and value}
-Before proceeding to the analysis, a quick note on the measures we constructed and used in the mixed random effects models below. With regards to the value of the options, these were taken from participants judgements. First consider the constructs of attention and value in the choice models. Value was defined as $V_{right} - V_{left}$, where $V_i$ is the participant defined value of option $i$. Attention was defined as 
-
+Before proceeding to the analysis, a quick note on the measures we constructed and used in the mixed random effects models below. Value was incorporated in the models as ``difference in value'' 
 \begin{equation}
-	\frac{T_{right}-T_{left}}{RT}	
+	\Delta_V = V_\text{right} - V_\text{left}	
 \end{equation}
-where $T_i$ is the total time spent fixating on option $i$ and $RT$ is the reaction time. 
+where $V_i$ is the value of each stimulus taken from participants' judgements in the final valuation task. Attention was incorporated in the models as ``difference in attention''
+\begin{equation}
+	\Delta_A = \frac{A_{right}-A_{left}}{RT}	
+\end{equation}
+where $A_i$ is the total time spent fixating on option $i$ and $RT$ is the reaction time.\footnote{Note that other ways of normalizing attention such as time spent on task or time spent looking at the two options made no difference. See section below.}
 
-In the models of reaction time, difference in attention and value were similarly defined, although the absolute value of each construct was taken as there is no reason to predict that participants would respond faster to the left (or right). Rather, we would expect participants to respond faster the greater the absolute difference between the options. 
-
+In the models of reaction time, $\Delta_A$ and $\Delta_V$ were similarly defined, although the absolute value of each construct was taken as there is no reason to predict that participants would respond faster to the left (or right). Rather, we would expect participants to respond faster the greater the absolute difference between the options. 
 
 \subsection{Predicting reaction times}
 There was a significant interaction between task order and condition on reaction time, $t(3)=8.01$, $SE=79.51$, $p<.001$. Participants who completed the continuous task first were faster than those that completed it second, whereas participants who completed the binary task first were slower than those that completed it second (see Figure~\ref{figure:RTblockGraph}). Further, the four-way interaction of task, attention, value with task order was marginal, $t=1.88$, $SE=139.16$, $p=.060$. So, as preregistered, in the following we only considered information from the first block. 
@@ -109,30 +111,32 @@ There was a significant interaction between task order and condition on reaction
 	\label{figure:RTblockGraph}
 \end{figure}
 
-There was a significant variance in reaction time intercepts across participants, $SD=1114.18$ (95\% CI: 900.45, 1378.63), $\chi^2(1)=1375.60$, $p<.001$. Additionally, slopes based on absolute difference in attention significantly varied across participants, $SD=556.09$ (95\% CI: 275.62, 1121.96), $\chi(1)=8.21$, $p=.004$. As did the slopes based on absolute difference in value, $SD=90.54$ (95\% CI: 52.81, 155.24), $\chi(1)=8.34$, $p=.004$. Therefore, the final model included main effects of task, attention and value, with random effects of attention and value. 
-	
 \input{tables/RTmodels.tex}
 
-Table~\ref{table:rtModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full reaction time model (see Figure~\ref{figure:RTattentionValueGraph}). In summary, reaction times were significantly predicted by difference in attention, $t=2.44$, $SE=318.49$, $p=.015$. The greater the difference in amount of attention between the two options, the faster the participant responded. There was also an effect of difference in value, $t=2.03$, $SE=43.70$, $p=.043$. The greater the difference in value between the choices, the faster participants responded. The main effect of task, the two-way and three-way interactions did not reach significance ($p>=0.331$). 
+There was a significant variance in reaction time intercepts across participants, $SD=1114.18$ (95\% CI: 900.45, 1378.63), $\chi^2(1)=1375.60$, $p<.001$. Additionally, slopes based on absolute difference in attention ($|\Delta_A|$) significantly varied across participants, $SD=556.09$ (95\% CI: 275.62, 1121.96), $\chi(1)=8.21$, $p=.004$. As did the slopes based on absolute difference in value ($|\Delta_V|$), $SD=90.54$ (95\% CI: 52.81, 155.24), $\chi(1)=8.34$, $p=.004$. Therefore, the final model included main effects of task, attention and value, with random effects of attention and value. 
 
-\begin{figure}
+\begin{figure}[b!]
 	\centering
 	\includegraphics{images/RTattentionValueGraph}
 	\caption{Looking at reaction time across difference in attention quartiles, where 1=not much difference in attention between options, 4 a lot of difference in attention between options.}
 	\label{figure:RTattentionValueGraph}
 \end{figure}
 
+Table~\ref{table:rtModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full reaction time model (see Figure~\ref{figure:RTattentionValueGraph}). In summary, reaction times were significantly predicted by difference in attention, $t=2.44$, $SE=318.49$, $p=.015$. The greater the difference in amount of attention between the two options, the faster the participant responded. There was also an effect of difference in value, $t=2.03$, $SE=43.70$, $p=.043$. The greater the difference in value between the choices, the faster participants responded. The main effect of task, the two-way and three-way interactions did not reach significance ($p>=0.331$). 
+
+
 \subsection{Choice}
 To consider a mixed effects model of choice, we recoded the responses given in the continuous task as binary. Other ways of completing this analysis, which attempted to take into account the additional information available in the continuous tasks (such as linear probability models), found similar results. 
 
-There was no interaction between task and order on choice, $p=.766$. Additionally, a main effects analysis found the four-way interaction was not significant, $p=.999$. Therefore, in the following we disregard order as a main effect and include data from both tasks. 
-
-There was a significant random effect of difference in attention on choice, $\chi^2(1)=1791.02$, $p<.001$. There was also a random effect of difference in value on choice, $\chi^2(1)=1341.70$, $p<.001$. A random effect of task did not add additional information, $\chi^2(3)=0.46$, $p=.928$. Therefore, the final model included fixed effects of task, attention and value, with random effects of attention and value.
+There was no interaction between task and order on choice, $p=.766$. Additionally, a main effects analysis found the four-way interaction was not significant, $p=.999$. However, there was a significant effect of task order on reaction time, so here we report an analysis of the first block only. 
 
 \input{tables/choiceModel.tex} 
 
+There was a significant random effect of difference in attention on choice, $\chi^2(1)=1791.02$, $p<.001$. There was also a random effect of difference in value on choice, $\chi^2(1)=1341.70$, $p<.001$. A random effect of task did not add additional information, $\chi^2(3)=0.46$, $p=.928$. Therefore, the final model included fixed effects of task, attention and value, with random effects of attention and value.
+
 Table~\ref{table:choiceModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full choice model. Choice was significantly predicted by attention, $t(1)=12.89$, $SE=0.44$, $p<.001$, and value, $t(1)=14.28$, $SE=0.06$, $p<.001$. In other words, the picture that was looked at more was more likely to be picked, as was the picture that the participant preferred. The main effect of task, as well as two- and three-way interactions did not reach significance ($p>=.168$).
 
+\newpage
 \section{Alternative analyses}
 So, the above (pre-registered) analyses indicate no substantial differences between the binary choice and strength-of-preference tasks. Some remaining possibilities are that the \emph{pattern} of attention is different between these two tasks. Possible metrics that might capture these differences are:
 
@@ -160,6 +164,39 @@ where $D_i$ was the mean duration of fixations on option $i$.
 Including random effects did not improve the explanatory power of this model. Further, as seen in Table~\ref{table:durFixModel}, nothing came out. 
 
 \input{tables/durFixModel.tex}
+
+\subsection{Looking at different ways of operationalizing attention}
+In the above analyses, attention was operationalized as 
+
+\begin{equation}
+	\frac{T_{right}-T_{left}}{RT}	
+\end{equation}
+where $T_i$ is the total time spent fixating on option $i$ and $RT$ is the reaction time. 
+
+However, previously Tim has used
+
+\begin{equation}
+	\frac{T_{right}-T_{left}}{T_{right}+T_{left}}
+\end{equation}
+where attention is normalized out of the total time spent looking at options. 
+
+Also, CERE noticed that participants appear to spend more time looking at the Likert scale in the strength-of-preference task than in the binary task. Especially when the participants appeared to be undecided between the two options. Therefore, 
+
+\begin{equation}
+	\frac{T_\text{right}-T_\text{left}}{T_\text{right}+T_\text{left}+T_\text{likert}}
+\end{equation}
+is a measure of difference of attention normalised by time spent on task. 
+
+\input{tables/choiceModelAttention.tex}
+
+Mainly because (as shown in Figure~\ref{figure:attentionCorrelations}) they all correlate pretty perfectly. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\textwidth]{images/attentionCorrelations}
+	\caption{Correlations between different metrics of attention}
+	\label{figure:attentionCorrelations}
+\end{figure}
 
 \section{Discussion}
 
