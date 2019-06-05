@@ -97,7 +97,7 @@ One participant was excluded as they spent less than 60\% of the time on task du
 
 As pre-registered, participants were excluded on a task by task basis. In previous eye-tracking research, we found that some participants spend a considerable amount of time off task, i.e. not looking at either the stimuli or the response scale. Here, only participant was found to be an outlier in the binary task and their data was removed. An outlier here is defined as the average proportion of time across all binary choice trials was less than the first quartile of all participants minus 1.5 times the interquartile range. This left 53 participants. 
 
-We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. There was no difference in the models if we included the information from all trials (see Appendix}. 
+We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. There was no difference in the models if we included the information from all trials (see Appendix). 
 
 \subsection{Operationalizing attention and value}
 Before proceeding to the analysis, a quick note on the measures we constructed and used in the mixed random effects models below. Value was incorporated in the models as ``difference in value'' 
@@ -131,6 +131,13 @@ There was a significant variance in reaction time intercepts across participants
 	\includegraphics{images/RTattentionValueGraph}
 	\caption{Looking at reaction time across difference in attention quartiles, where 1=not much difference in attention between options, 4 a lot of difference in attention between options.}
 	\label{figure:RTattentionValueGraph}
+\end{figure}
+
+\begin{figure}[b!]
+	\centering
+	\includegraphics{images/predictedRTattentionValueGraph.pdf}
+	\caption{Predicted reaction times based on the model.}
+	\label{figure:predictedRTattentionValueGraph}
 \end{figure}
 
 Table~\ref{table:rtModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full reaction time model (see Figure~\ref{figure:RTattentionValueGraph}). In summary, reaction times were significantly predicted by difference in attention, $t=2.44$, $SE=318.49$, $p=.015$. The greater the difference in amount of attention between the two options, the faster the participant responded. There was also an effect of difference in value, $t=2.03$, $SE=43.70$, $p=.043$. The greater the difference in value between the choices, the faster participants responded. The main effect of task, the two-way and three-way interactions did not reach significance ($p>=0.331$). 

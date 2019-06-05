@@ -4,7 +4,7 @@
 rm(list=ls())
 
 require(data.table); require(plyr); require(ggplot2); require(MuMIn);
-require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4)
+require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4); library(merTools)
 
 require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
 
@@ -142,7 +142,36 @@ ggplot(rt.graph.summary.data, aes(group=att.quartile, y=meanRT, x=abs.value)) +
                                          colour ="black"))
 ggsave('../techReport/images/RTattentionValueGraph.pdf', height=3.5, width=6, units="in")
 
-# Data and model fit graph -- Ask Neil
+# Model fit graph
+predict.rt.graph.data <- cbind(rt.graph.data, predictInterval(rt.model, newdata = rt.graph.data, n.sims = 999))
+
+# predict.rt.graph.summary.data <- dcast(predict.rt.graph.data, task + att.quartile + abs.value ~ .,
+#                                fun=mean, value.var="rt")
+# colnames(predict.rt.graph.summary.data)[4] <- "rt"
+
+predict.rt.graph.summary.data <- predict.rt.graph.data[, .(meanRT=mean(fit), sd=sd(fit), N=.N), by=.(task, att.quartile, abs.value)]
+predict.rt.graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
+
+predict.rt.graph.summary.data <- predict.rt.graph.summary.data[abs.value%%1==0,]
+
+# New facet label names for task variable
+task.labs <- c("Binary choice", "Strength-of-preference")
+names(task.labs) <- c("binary", "continuous")
+
+ggplot(predict.rt.graph.summary.data, aes(group=att.quartile, y=meanRT, x=abs.value)) +
+  geom_point(aes(color=att.quartile), position=position_dodge(width=0.5)) +
+  geom_line(aes(color=att.quartile), position=position_dodge(width=0.5), linetype = "dashed") +
+  geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=att.quartile),
+                position=position_dodge(width=0.5)) +
+  facet_grid(. ~ task,
+             labeller=labeller(task=task.labs)) +
+  labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
+  theme_bw() +
+  coord_cartesian(ylim=c(0, 5000)) +
+  scale_color_gradientn(colours = rainbow(4)) +
+  theme(legend.background = element_rect(size=0.2, linetype="solid",
+                                         colour ="black"))
+ggsave('../techReport/images/predictedRTattentionValueGraph.pdf', height=3.5, width=6, units="in")
 
 ## Choice ------------------------------------------------------------------------------------------
 # Considering random effects
@@ -486,3 +515,13 @@ stargazer(rt.smith.task, type="latex",
           label="table:rtModelSmithTask", table.placement="!b",
           notes="\\footnotesize $\\sum_A$ = total value; $\\Delta_V$ = value difference; ",
           notes.append=F, notes.align="l") # Print table to file
+
+
+rt.smith.cont <- lm(rt ~ total.value*abs(value.difference),
+               data=data[task=="continuous" & block==1,])
+summary(rt.smith.cont)
+
+rt.smith.binary <- lm(rt ~ total.value*abs(value.difference),
+                    data=data[task=="binary" & block==1,])
+summary(rt.smith.binary)
+confint(rt.smith.binary)
