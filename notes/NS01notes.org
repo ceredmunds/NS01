@@ -12,7 +12,7 @@ NS01 notes -*- mode: org -*-
 ** DONE Rerun rt models with all different types of attention
 ** DONE Add analyses without removing rt trials
 ** DONE Does overall value predict RT in binary choice but not evaluation task?
-** TODO emmeans - levels for delta_A, delta_V, task (draw model predictions)
+** DONE emmeans - levels for delta_A, delta_V, task (draw model predictions)
 ** TODO Last gaze predicts choice?
 ** TODO Gaze cascade effect?
 
@@ -20,4 +20,3 @@ NS01 notes -*- mode: org -*-
 + [[~/NS01/analysis/NS01analysis.R][Analysis file]] :: Most up-to-date analysis
 + [[~/NS01/techReport/NS01techReport.tex][Tech report]] :: Write up of rationale, method and results (so far). 
 
-- Total overall value predicts RT in binary choice but not evaulation task.
