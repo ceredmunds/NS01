@@ -210,17 +210,17 @@ anova(choice.random.intercept.only, choice.random.intercept.slope.att,
 
 choice.full <- glmer(recodedResponse ~ task*attention.difference*value.difference +
                       (1 + attention.difference + value.difference||participantNo),
-                    data=data[task!="valuation" & block==1,], family="binomial",
+                    data=data[task!="valuation" & block==2,], family="binomial",
                     control=glmerControl(optimizer="Nelder_Mead",
                                          check.conv.grad=.makeCC("warning", tol=1e-1)))
 summary(choice.full) # Model summary
 confint(choice.full, method="Wald") # Get 0.95 confidence intervals
-stargazer(choice.full, type="latex",
+stargazer(choice.full, type="text",
           title="Summary of coefficients of model predicting choice",
-          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
-                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
-                             "$\\Delta_A$ : $\\Delta_V$",
-                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
+          # covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+          #                    "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+          #                    "$\\Delta_A$ : $\\Delta_V$",
+          #                    "Task : $\\Delta_A$ :  $\\Delta_V$"),
           out="../techReport/tables/choiceModel.tex", style="default", ci=T, single.row=T,
           label="table:choiceModel", table.placement="!b",
           notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
