@@ -148,12 +148,33 @@ To consider a mixed effects model of choice, we recoded the responses given in t
 
 There was no interaction between task and order on choice, $p=.766$. Additionally, a main effects analysis found the four-way interaction was not significant, $p=.999$. However, there was a significant effect of task order on reaction time, so here we report an analysis of the first block only. 
 
-\input{tables/choiceModel.tex} 
-
 There was a significant random effect of difference in attention on choice, $\chi^2(1)=1791.02$, $p<.001$. There was also a random effect of difference in value on choice, $\chi^2(1)=1341.70$, $p<.001$. A random effect of task did not add additional information, $\chi^2(3)=0.46$, $p=.928$. Therefore, the final model included fixed effects of task, attention and value, with random effects of attention and value.
 
-Table~\ref{table:choiceModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full choice model. Choice was significantly predicted by attention, $t(1)=12.89$, $SE=0.44$, $p<.001$, and value, $t(1)=14.28$, $SE=0.06$, $p<.001$. In other words, the picture that was looked at more was more likely to be picked, as was the picture that the participant preferred. The main effect of task, as well as two- and three-way interactions did not reach significance ($p>=.168$).
+Table~\ref{table:choiceModelBlock1} contains the coefficients and 95\% confidence intervals for the fixed effects in the full choice model for the first block only (the preregistered analysis). Choice was significantly predicted by attention, $t(1)=12.89$, $SE=0.44$, $p<.001$, and value, $t(1)=14.28$, $SE=0.06$, $p<.001$. In other words, the picture that was looked at more was more likely to be picked, as was the picture that the participant preferred. The main effect of task, as well as two- and three-way interactions did not reach significance ($p>=.168$). The predicted choice probabilities are shown in Figure~\ref{figure:predictedChoiceGraph}.
 
+\input{tables/choiceModelAll.tex}
+\input{tables/choiceModelBlock1.tex}
+\input{tables/choiceModelBlock2.tex}
+
+\begin{figure}
+	\includegraphics{images/predictedChoiceGraph}
+	\caption{Predicted choice probabilities from the model, based on the first block only.}
+	\label{figure:predictedChoiceGraph}	
+\end{figure}
+
+
+Also included are the outputs for both blocks together (Table~\ref{table:choiceModelAll}) and for the final block on its own (Table~\ref{table:choiceModelBlock2}). The final block version is perhaps interesting as the reaction time analyses showed that the difference in reaction was greater for the second block than the first. Although this did change the coefficients slightly, the confidence intervals are still securely including 0. 
+
+\subsection{Distribution of continuous responses}
+In Figure~\ref{figure:continuousResponses} are reported the distributions of responses given by participants. 
+
+\begin{figure}[!b]
+	\includegraphics{images/continuousResponses}
+	\caption{Histogram of the responses given by participants in the continuous task, separated by task order.}
+	\label{figure:continuousResponses}
+\end{figure}
+
+\clearpage
 \newpage
 \section{Alternative analyses}
 So, the above (pre-registered) analyses indicate no substantial differences between the binary choice and strength-of-preference tasks. Some remaining possibilities are that the \emph{pattern} of attention is different between these two tasks. Possible metrics that might capture these differences are:

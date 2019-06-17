@@ -12,12 +12,12 @@ NS01 notes -*- mode: org -*-
 ** DONE Rerun rt models with all different types of attention
 ** DONE Add analyses without removing rt trials
 ** DONE Does overall value predict RT in binary choice but not evaluation task?
-** DONE emmeans - levels for delta_A, delta_V, task (draw model predictions)
+** TODO emmeans - levels for delta_A, delta_V, task (draw model predictions)
 ** TODO Check you did random variables correct for predict
 ** TODO Graphs of choice - predict if logistic, type=response
 ** TODO Sort N in tables
-** TODO Look at difference between block 1 and block 2 in terms of choice model
-** TODO Two graphs of continuous scale usage for blocks 1 and 2
+** DONE Look at difference between block 1 and block 2 in terms of choice model (Table 2)
+** DONE Two graphs of continuous scale usage for blocks 1 and 2
 ** TODO Make slides
 ** TODO Last gaze predicts choice?
 ** TODO Gaze cascade effect?

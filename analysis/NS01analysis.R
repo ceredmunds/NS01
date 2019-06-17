@@ -3,7 +3,7 @@
 ## Setup -------------------------------------------------------------------------------------------
 rm(list=ls())
 
-require(data.table); require(plyr); require(ggplot2); require(MuMIn);
+require(data.table); require(plyr); require(ggplot2); require(MuMIn); require(wesanderson)
 require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4); library(merTools)
 
 require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
@@ -127,23 +127,23 @@ rt.graph.summary.data <- rt.graph.summary.data[abs.value%%1==0,]
 task.labs <- c("Binary choice", "Strength-of-preference")
 names(task.labs) <- c("binary", "continuous")
 
-ggplot(rt.graph.summary.data, aes(group=att.quartile, y=meanRT, x=abs.value)) +
-  geom_point(aes(color=att.quartile), position=position_dodge(width=0.5)) +
-  geom_line(aes(color=att.quartile), position=position_dodge(width=0.5)) +
-  geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=att.quartile),
+ggplot(rt.graph.summary.data, aes(group=as.factor(att.quartile), y=meanRT, x=abs.value)) +
+  geom_point(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5)) +
+  geom_line(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5)) +
+  geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=as.factor(att.quartile)),
                 position=position_dodge(width=0.5)) +
   facet_grid(. ~ task,
              labeller=labeller(task=task.labs)) +
   labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
   theme_bw() +
-  coord_cartesian(ylim=c(0, 5000)) +
-  scale_color_gradientn(colours = rainbow(4)) +
+  coord_cartesian(ylim=c(1000, 4500)) +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling2")) +
   theme(legend.background = element_rect(size=0.2, linetype="solid",
                                          colour ="black"))
 ggsave('../techReport/images/RTattentionValueGraph.pdf', height=3.5, width=6, units="in")
 
 # Model fit graph
-predict.rt.graph.data <- cbind(rt.graph.data, predictInterval(rt.model, newdata = rt.graph.data, n.sims = 999))
+predict.rt.graph.data <- cbind(rt.graph.data, predict(rt.full, newdata = rt.graph.data, type="response"))
 
 # predict.rt.graph.summary.data <- dcast(predict.rt.graph.data, task + att.quartile + abs.value ~ .,
 #                                fun=mean, value.var="rt")
@@ -210,21 +210,90 @@ anova(choice.random.intercept.only, choice.random.intercept.slope.att,
 
 choice.full <- glmer(recodedResponse ~ task*attention.difference*value.difference +
                       (1 + attention.difference + value.difference||participantNo),
-                    data=data[task!="valuation" & block==2,], family="binomial",
+                    data=data[task!="valuation",], family="binomial",
                     control=glmerControl(optimizer="Nelder_Mead",
                                          check.conv.grad=.makeCC("warning", tol=1e-1)))
 summary(choice.full) # Model summary
 confint(choice.full, method="Wald") # Get 0.95 confidence intervals
-stargazer(choice.full, type="text",
-          title="Summary of coefficients of model predicting choice",
-          # covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
-          #                    "Task : $\\Delta_A$", "Task : $\\Delta_V$",
-          #                    "$\\Delta_A$ : $\\Delta_V$",
-          #                    "Task : $\\Delta_A$ :  $\\Delta_V$"),
-          out="../techReport/tables/choiceModel.tex", style="default", ci=T, single.row=T,
-          label="table:choiceModel", table.placement="!b",
+stargazer(choice.full, type="latex",
+          title="Summary of coefficients of model predicting choice (both blocks).",
+          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+                             "$\\Delta_A$ : $\\Delta_V$",
+                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
+          out="../techReport/tables/choiceModelAll.tex", style="default", ci=T, single.row=T,
+          label="table:choiceModelAll", table.placement="!b",
           notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
           notes.append=F, notes.align="l") # Print table to file
+
+choice.full.block1 <- glmer(recodedResponse ~ task*attention.difference*value.difference +
+                       (1 + attention.difference + value.difference||participantNo),
+                     data=data[task!="valuation" & block==1,], family="binomial",
+                     control=glmerControl(optimizer="Nelder_Mead",
+                                          check.conv.grad=.makeCC("warning", tol=1e-1)))
+summary(choice.full.block1) # Model summary
+confint(choice.full.block1, method="Wald") # Get 0.95 confidence intervals
+stargazer(choice.full.block1, type="latex",
+          title="Summary of coefficients of model predicting choice (Block 1 only).",
+          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+                             "$\\Delta_A$ : $\\Delta_V$",
+                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
+          out="../techReport/tables/choiceModelBlock1.tex", style="default", ci=T, single.row=T,
+          label="table:choiceModelBlock1", table.placement="!b",
+          notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
+          notes.append=F, notes.align="l") # Print table to file
+
+choice.full.block2 <- glmer(recodedResponse ~ task*attention.difference*value.difference +
+                              (1 + attention.difference + value.difference||participantNo),
+                            data=data[task!="valuation" & block==2,], family="binomial",
+                            control=glmerControl(optimizer="Nelder_Mead",
+                                                 check.conv.grad=.makeCC("warning", tol=1e-1)))
+summary(choice.full.block2) # Model summary
+confint(choice.full.block2, method="Wald") # Get 0.95 confidence intervals
+stargazer(choice.full.block2, type="latex",
+          title="Summary of coefficients of model predicting choice (Block 2 only).",
+          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+                             "$\\Delta_A$ : $\\Delta_V$",
+                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
+          out="../techReport/tables/choiceModelBlock2.tex", style="default", ci=T, single.row=T,
+          label="table:choiceModelBlock2", table.placement="!b",
+          notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference;",
+          notes.append=F, notes.align="l") # Print table to file
+
+# Distributions of continuous responses ------------------------------------------------------------
+labels <- c("1" = "Block 1", "2" = "Block 2")
+
+ggplot(data[task=="continuous",], aes(x=response)) +
+  geom_histogram(binwidth=0.02) +
+  facet_grid(.~taskOrder, labeller=labeller(taskOrder=labels)) +
+  labs(x="Response", y="Count") +
+  theme_bw()
+ggsave("../techReport/images/continuousResponses.pdf", units="in", width=6, height=4)
+
+# Plot predicted choices ---------------------------------------------------------------------------
+summary(choice.full)
+
+graph.data <- data[task!="valuation" & block==1,]
+graph.data[, att.quartile:=cut(attention.difference,
+                               quantile(attention.difference, probs=0:4/4),
+                               include.lowest=T, labels=F), by=task]
+graph.data[, predictChoice:= predict(choice.full, newdata=graph.data, type="response")]
+
+graph.summary.data <- graph.data[, .(meanChoice=mean(predictChoice), sd=sd(predictChoice), N=.N), by=.(task, att.quartile, value.difference)]
+graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
+
+ggplot(graph.summary.data, aes(x=value.difference, y=meanChoice, group=as.factor(att.quartile),
+                               color=as.factor(att.quartile))) +
+  geom_point() +
+  geom_line() +
+  facet_grid(.~task) +
+  geom_errorbar(aes(ymax=meanChoice+ci, ymin=meanChoice-ci)) +
+  labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
+  theme_bw() +
+  scale_color_manual(values=wes_palette(n=4, name="Darjeeling2"))
+ggsave("../techReport/images/predictedChoiceGraph.pdf", units="in", width=7, height=4)
 
 # Number of fixations ------------------------------------------------------------------------------
 nFixData <- dcast(fixations[task!="valuation"], participantNo + task + trial ~ aoi, fun=length, value.var="aoi")
