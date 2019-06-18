@@ -4,7 +4,8 @@
 rm(list=ls())
 
 require(data.table); require(plyr); require(ggplot2); require(MuMIn); require(wesanderson)
-require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4); library(merTools)
+require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4); library(merTools);
+require(nlme); require(emmeans)
 
 require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
 
@@ -35,9 +36,12 @@ data[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
 data[, `:=`(participantNo=factor(participantNo), task=factor(task))]
 
 ## Reaction times ----------------------------------------------------------------------------------
+data[, abs.attention.diff:= abs(attention.difference)]
+data[, abs.value.diff:= abs(value.difference)]
+
 # Order effects
 rt.order <- lm(rt ~ task*taskOrder, data=data[task!="valuation",], method="ML")
-rt.order.all <- lm(rt ~ task*taskOrder*attention.difference*value.difference,
+rt.order.all <- lm(rt ~ task*taskOrder*abs.attention.diff*abs.value.diff,
                     data=data[task!="valuation",], method="ML")
 
 rt.task.1 <-  gls(rt ~ task, data=data[task!="valuation" & block==1,], method="ML")
@@ -78,11 +82,11 @@ rt.random.intercept.only <- lmer(rt ~ 1 + 1|participantNo,
                                 data=data[task!="valuation" & block==1,], REML=F)
 
 # Random intercepts and slopes based on attention
-rt.random.intercept.slope.att <- lmer(rt ~ 1 + abs(attention.difference)||participantNo,
+rt.random.intercept.slope.att <- lmer(rt ~ 1 + abs.attention.diff||participantNo,
                                           data=data[task!="valuation" & block==1,], REML=F)
 
 # Random intercepts and slopes based on attention and value
-rt.random.intercept.slope.att.val <- lmer(rt ~ 1 + abs(attention.difference)+abs(value.difference)||participantNo,
+rt.random.intercept.slope.att.val <- lmer(rt ~ 1 + (abs.attention.diff+abs.value.diff)||participantNo,
                                      data=data[task!="valuation" & block==1,], REML=F)
 
 # Comparing random models
@@ -90,8 +94,8 @@ anova(rt.random.intercept.only, rt.intercept.only, rt.random.intercept.slope.att
       rt.random.intercept.slope.att.val)
 
 # Full model (i.e. including fixed effects)
-rt.full <- lmer(rt ~ task*abs(attention.difference)*abs(value.difference) +
-                  (abs(value.difference)||participantNo),
+rt.full <- lmer(rt ~ task*abs.attention.diff*abs.value.diff +
+                  (abs.attention.diff + abs.value.diff||participantNo),
                data=data[task!="valuation" & block==1,],
                control=lmerControl(optimizer="Nelder_Mead"))
 summary(rt.full) # Model summary
@@ -109,25 +113,21 @@ stargazer(rt.full, type="latex",
 
 # Graph of attention and value on reaction time (think by quartiles)
 rt.graph.data <- data[task!="valuation" & block==1,]
-rt.graph.data[, att.quartile:= cut(abs(attention.difference),
-                                       quantile(abs(attention.difference), probs=0:4/4),
+rt.graph.data[, att.quartile:= cut(abs.attention.diff,
+                                       quantile(abs.attention.diff, probs=0:4/4),
                                        include.lowest=TRUE, labels=FALSE),
                   by=task]
-rt.graph.data[, abs.value:=abs(value.difference)]
-rt.graph.summary.data <- dcast(rt.graph.data, task + att.quartile + abs.value ~ .,
-                                   fun=mean, value.var="rt")
-colnames(rt.graph.summary.data)[4] <- "rt"
 
-rt.graph.summary.data <- rt.graph.data[, .(meanRT=mean(rt), sd=sd(rt), N=.N), by=.(task, att.quartile, abs.value)]
+rt.graph.summary.data <- rt.graph.data[, .(meanRT=mean(rt), sd=sd(rt), N=.N), by=.(task, att.quartile, abs.value.diff)]
 rt.graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
 
-rt.graph.summary.data <- rt.graph.summary.data[abs.value%%1==0,]
+rt.graph.summary.data <- rt.graph.summary.data[abs.value.diff%%1==0,]
 
 # New facet label names for task variable
 task.labs <- c("Binary choice", "Strength-of-preference")
 names(task.labs) <- c("binary", "continuous")
 
-ggplot(rt.graph.summary.data, aes(group=as.factor(att.quartile), y=meanRT, x=abs.value)) +
+ggplot(rt.graph.summary.data, aes(group=as.factor(att.quartile), y=meanRT, x=abs.value.diff)) +
   geom_point(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5)) +
   geom_line(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5)) +
   geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=as.factor(att.quartile)),
@@ -137,42 +137,66 @@ ggplot(rt.graph.summary.data, aes(group=as.factor(att.quartile), y=meanRT, x=abs
   labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
   theme_bw() +
   coord_cartesian(ylim=c(1000, 4500)) +
-  scale_color_manual(values=wes_palette(n=4, name="Darjeeling2")) +
+  scale_color_manual(values=wes_palette(n=4, name="Zissou1")) +
   theme(legend.background = element_rect(size=0.2, linetype="solid",
                                          colour ="black"))
 ggsave('../techReport/images/RTattentionValueGraph.pdf', height=3.5, width=6, units="in")
 
-# Model fit graph
-predict.rt.graph.data <- cbind(rt.graph.data, predict(rt.full, newdata = rt.graph.data, type="response"))
+# RT model fit graph -------------------------------------------------------------------------------
 
-# predict.rt.graph.summary.data <- dcast(predict.rt.graph.data, task + att.quartile + abs.value ~ .,
-#                                fun=mean, value.var="rt")
-# colnames(predict.rt.graph.summary.data)[4] <- "rt"
+# predict.rt.graph.data <- rt.graph.data[, fit:=predict(rt.full, newdata = rt.graph.data, type="response")]
+#
+#
+# # predict.rt.graph.summary.data <- dcast(predict.rt.graph.data, task + att.quartile + abs.value ~ .,
+# #                                fun=mean, value.var="rt")
+# # colnames(predict.rt.graph.summary.data)[4] <- "rt"
+#
+# predict.rt.graph.summary.data <- predict.rt.graph.data[, .(meanRT=mean(fit), sd=sd(fit), N=.N),
+#                                                        by=.(task, att.quartile, abs.value)]
+# predict.rt.graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
+#
+# predict.rt.graph.summary.data <- predict.rt.graph.summary.data[abs.value%%1==0,]
+#
+# # New facet label names for task variable
+# task.labs <- c("Binary choice", "Strength-of-preference")
+# names(task.labs) <- c("binary", "continuous")
+#
+# ggplot(predict.rt.graph.summary.data, aes(group=as.factor(att.quartile), y=meanRT, x=abs.value)) +
+#   geom_point(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5)) +
+#   geom_line(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5), linetype = "dashed") +
+#   geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=as.factor(att.quartile)),
+#                 position=position_dodge(width=0.5)) +
+#   facet_grid(. ~ task,
+#              labeller=labeller(task=task.labs)) +
+#   labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
+#   theme_bw() +
+#   coord_cartesian(ylim=c(1000, 4500)) +
+#   scale_color_manual(values=wes_palette(n=4, name="Zissou1")) +
+#   theme(legend.background = element_rect(size=0.2, linetype="solid",
+#                                          colour ="black"))
+# ggsave('../techReport/images/predictedRTattentionValueGraph.pdf', height=3.5, width=6, units="in")
 
-predict.rt.graph.summary.data <- predict.rt.graph.data[, .(meanRT=mean(fit), sd=sd(fit), N=.N), by=.(task, att.quartile, abs.value)]
-predict.rt.graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
+require(emmeans)
+predict.rt <- as.data.table(emmeans(rt.full, ~ abs.attention.diff * abs.value.diff * task,
+                      at = list(abs.attention.diff =
+                                  quantile(data[task!="valuation" & block==1,
+                                                abs.attention.diff], c(.25, .5, .75)),
+                                abs.value.diff = 0:6)))
+predict.rt[, abs.attention.diff:=factor(abs.attention.diff, labels=c('small', 'med', 'large'))]
 
-predict.rt.graph.summary.data <- predict.rt.graph.summary.data[abs.value%%1==0,]
-
-# New facet label names for task variable
-task.labs <- c("Binary choice", "Strength-of-preference")
-names(task.labs) <- c("binary", "continuous")
-
-ggplot(predict.rt.graph.summary.data, aes(group=att.quartile, y=meanRT, x=abs.value)) +
-  geom_point(aes(color=att.quartile), position=position_dodge(width=0.5)) +
-  geom_line(aes(color=att.quartile), position=position_dodge(width=0.5), linetype = "dashed") +
-  geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=att.quartile),
-                position=position_dodge(width=0.5)) +
-  facet_grid(. ~ task,
-             labeller=labeller(task=task.labs)) +
+ggplot(predict.rt, aes(x=abs.value.diff, y=emmean, group=abs.attention.diff,
+                       color=abs.attention.diff)) +
+  geom_point(position=position_dodge(width=0.5), size=2) +
+  geom_line(position=position_dodge(width=0.5), size=1) +
+  geom_errorbar(aes(ymin=lower.CL, ymax=upper.CL), position=position_dodge(width=0.5), size=0.4) +
+  facet_grid(.~task, labeller=labeller(task=task.labs)) +
   labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
   theme_bw() +
-  coord_cartesian(ylim=c(0, 5000)) +
-  scale_color_gradientn(colours = rainbow(4)) +
+  coord_cartesian(ylim=c(1000, 4500)) +
+  scale_color_manual(values=wes_palette(n=4, name="Zissou1")) +
   theme(legend.background = element_rect(size=0.2, linetype="solid",
                                          colour ="black"))
 ggsave('../techReport/images/predictedRTattentionValueGraph.pdf', height=3.5, width=6, units="in")
-
 ## Choice ------------------------------------------------------------------------------------------
 # Considering random effects
 # Order effects
@@ -273,57 +297,75 @@ ggplot(data[task=="continuous",], aes(x=response)) +
 ggsave("../techReport/images/continuousResponses.pdf", units="in", width=6, height=4)
 
 # Plot predicted choices ---------------------------------------------------------------------------
-summary(choice.full)
+summary(choice.full.block1)
 
-graph.data <- data[task!="valuation" & block==1,]
-graph.data[, att.quartile:=cut(attention.difference,
-                               quantile(attention.difference, probs=0:4/4),
-                               include.lowest=T, labels=F), by=task]
-graph.data[, predictChoice:= predict(choice.full, newdata=graph.data, type="response")]
+predict.choice <- as.data.table(emmeans(choice.full.block1, ~ attention.difference * value.difference * task,
+                                        at=list(attention.difference =
+                                                  quantile(data[task!="valuation" & block==1,
+                                                                attention.difference], c(.25, .5, .75)),
+                                                value.difference=-6:6),
+                                        type = "response"))
+predict.choice
+predict.choice[, attention.difference:=factor(round(attention.difference, 2))]
 
-graph.summary.data <- graph.data[, .(meanChoice=mean(predictChoice), sd=sd(predictChoice), N=.N), by=.(task, att.quartile, value.difference)]
-graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
-
-ggplot(graph.summary.data, aes(x=value.difference, y=meanChoice, group=as.factor(att.quartile),
-                               color=as.factor(att.quartile))) +
-  geom_point() +
-  geom_line() +
-  facet_grid(.~task) +
-  geom_errorbar(aes(ymax=meanChoice+ci, ymin=meanChoice-ci)) +
-  labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
+ggplot(predict.choice, aes(x=value.difference, y=prob, group=attention.difference,
+                       color=attention.difference)) +
+  geom_point(position=position_dodge(width=0.5), size=2) +
+  geom_line(position=position_dodge(width=0.5), size=1) +
+  geom_errorbar(aes(ymin=asymp.LCL, ymax=asymp.UCL), position=position_dodge(width=0.5), size=0.4)+
+  facet_grid(.~task, labeller=labeller(task=task.labs)) +
+  labs(x="Value difference", y="Choice", color="Attention \ndifference") +
   theme_bw() +
-  scale_color_manual(values=wes_palette(n=4, name="Darjeeling2"))
-ggsave("../techReport/images/predictedChoiceGraph.pdf", units="in", width=7, height=4)
+  scale_color_manual(values=wes_palette(n=4, name="Zissou1")) +
+  theme(legend.background = element_rect(size=0.2, linetype="solid",
+                                         colour ="black"))
+ggsave('../techReport/images/predictedChoiceGraph.pdf', height=3.5, width=6, units="in")
 
 # Number of fixations ------------------------------------------------------------------------------
-nFixData <- dcast(fixations[task!="valuation"], participantNo + task + trial ~ aoi, fun=length, value.var="aoi")
+nFixData <- dcast(fixations,
+                  participantNo + task + taskOrder + block + trial + response + rt + lValue + rValue
+                  ~ aoi, fun=length, value.var="aoi")
 nFixData[, relativeFixN:= right/(left+right)]
-data <- merge(data, nFixData, by=c("participantNo", "task", "trial"))
+
+nFixData[, value.difference:=rValue-lValue]
+nFixData[, attention.difference:=right-left]
+
+# Different types of attention
+nFixData[, attentionByOptions:=(right-left)/(right+left)]
+nFixData[, attentionByTimeOnTask:=(right-left)/(right+left+likertHorizontal)]
+
+# Recode responses to get binary responses from continuous task
+nFixData[, recodedResponse:= response]
+nFixData[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
+
+nFixData[, `:=`(participantNo=factor(participantNo), task=factor(task))]
 
 # Random intercepts
-fixN.intercept.only <- lm(relativeFixN ~ 1, data=data[task!="valuation",])
+fixN.intercept.only <- lm(relativeFixN ~ 1, data=nFixData[task!="valuation" & block==1,])
 
 fixN.random.intercept.only <- lmer(relativeFixN ~ 1 + 1|participantNo,
-                                   data=data[task!="valuation",],
+                                   data=nFixData[task!="valuation" & block==1,],
                                    control=lmerControl(optimizer="Nelder_Mead"))
 
-fixN.random.intercept.slope.att <- lmer(relativeFixN ~ (attention.difference)||participantNo,
-                                        data=data[task!="valuation",],
+fixN.random.intercept.slope.att <- lmer(relativeFixN ~ (attention.difference||participantNo),
+                                        data=nFixData[task!="valuation" & block==1,],
                                         control=lmerControl(optimizer="Nelder_Mead"))
-# Singular...
-fixN.random.intercept.slope.value <- lmer(relativeFixN ~ (value.difference)||participantNo,
-                                          data=data[task!="valuation",],
+
+fixN.random.intercept.slope.value <- lmer(relativeFixN ~ (value.difference||participantNo),
+                                          data=nFixData[task!="valuation" & block==1,],
                                           control=lmerControl(optimizer="Nelder_Mead"))
+# singular...
 fixN.random.intercept.slope.task <- lmer(relativeFixN ~ (task)||participantNo,
-                                              data=data[task!="valuation",],
+                                              data=nFixData[task!="valuation" & block==1,],
                                               control=lmerControl(optimizer="Nelder_Mead"))
 
-anova(fixN.random.intercept.only, fixN.intercept.only, fixN.random.intercept.slope.att)
+anova(fixN.random.intercept.only, fixN.intercept.only, fixN.random.intercept.slope.att,
+      fixN.random.intercept.slope.value)
 
 
 fixN.model <- lmer(relativeFixN ~ task*attention.difference*value.difference +
                              (1|participantNo),
-                           data=data[task!="valuation" & block==1,])
+                           data=nFixData[task!="valuation" & block==1,])
 summary(fixN.model)
 stargazer(fixN.model, type="latex",
           title="Summary of coefficients of model predicting number of fixations on each choice",
@@ -337,34 +379,50 @@ stargazer(fixN.model, type="latex",
           notes.append=F, notes.align="l") # Print table to file
 
 # Duration of fixations ----------------------------------------------------------------------------
-durData <- dcast(fixations[task!="valuation"], participantNo + task + trial ~ aoi, fun=mean, value.var="fixLengthTr")
+durData <- dcast(fixations,
+                 participantNo + task + taskOrder + block + trial + response + rt + lValue + rValue
+                 ~ aoi, fun=mean, value.var="fixLengthTr")
 durData[, relativeFixDur:= right/(left+right)]
-data <- merge(data, durData, by=c("participantNo", "task", "trial"))
+
+durData[, value.difference:=rValue-lValue]
+durData[, attention.difference:=right-left]
+
+# Different types of attention
+durData[, attentionByOptions:=(right-left)/(right+left)]
+durData[, attentionByTimeOnTask:=(right-left)/(right+left+likertHorizontal)]
+
+# Recode responses to get binary responses from continuous task
+durData[, recodedResponse:= response]
+durData[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
+
+durData[, `:=`(participantNo=factor(participantNo), task=factor(task))]
 
 # Random effects
-fixD.intercept.only <- lm(relativeFixDur ~ 1, data=data[task!="valuation",])
+fixD.intercept.only <- lm(relativeFixDur ~ 1, data=durData[task!="valuation" & block==1,])
 
-fixD.random.intercept.only <- lmer(relativeFixDur ~ 1 + 1|participantNo,
-                                   data=data[task!="valuation",],
+fixD.random.intercept.only <- lmer(relativeFixDur ~ 1 + (1|participantNo),
+                                   data=durData[task!="valuation" & block==1,],
                                    control=lmerControl(optimizer="Nelder_Mead"))
 
-fixD.random.intercept.slope.value <- lmer(relativeFixDur ~ (value.difference)||participantNo,
-                                          data=data[task!="valuation",],
+fixD.random.intercept.slope.value <- lmer(relativeFixDur ~ (value.difference||participantNo),
+                                          data=durData[task!="valuation" & block==1,],
                                           control=lmerControl(optimizer="Nelder_Mead"))
-# Singular...
-fixD.random.intercept.slope.att <- lmer(relativeFixDur ~ (attention.difference)||participantNo,
-                                        data=data[task!="valuation",],
-                                        control=lmerControl(optimizer="Nelder_Mead"))
 
+fixD.random.intercept.slope.att <- lmer(relativeFixDur ~ (attention.difference||participantNo),
+                                        data=durData[task!="valuation" & block==1,],
+                                        control=lmerControl(optimizer="Nelder_Mead"))
+# odd?
 fixD.random.intercept.slope.task <- lmer(relativeFixDur ~ (task)||participantNo,
-                                         data=data[task!="valuation",],
+                                         data=durData[task!="valuation" & block==1,],
                                          control=lmerControl(optimizer="Nelder_Mead"))
 
-anova(fixD.random.intercept.only, fixD.intercept.only, fixD.random.intercept.slope.value)
+anova(fixD.random.intercept.only, fixD.intercept.only, fixD.random.intercept.slope.value,
+      fixD.random.intercept.slope.att)
 
 
-fix.duration.model <- lm(relativeFixDur ~ task*attention.difference*value.difference,
-                           data=data[task!="valuation" & block==1,])
+fix.duration.model <- lmer(relativeFixDur ~ task*attention.difference*value.difference +
+                           (1|participantNo),
+                           data=durData[task!="valuation" & block==1,])
 summary(fix.duration.model)
 stargazer(fix.duration.model, type="latex",
           title="Summary of coefficients of model predicting duration of time on options",

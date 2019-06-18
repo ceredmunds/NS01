@@ -142,7 +142,6 @@ There was a significant variance in reaction time intercepts across participants
 
 Table~\ref{table:rtModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full reaction time model (see Figure~\ref{figure:RTattentionValueGraph}). In summary, reaction times were significantly predicted by difference in attention, $t=2.44$, $SE=318.49$, $p=.015$. The greater the difference in amount of attention between the two options, the faster the participant responded. There was also an effect of difference in value, $t=2.03$, $SE=43.70$, $p=.043$. The greater the difference in value between the choices, the faster participants responded. The main effect of task, the two-way and three-way interactions did not reach significance ($p>=0.331$). 
 
-
 \subsection{Choice}
 To consider a mixed effects model of choice, we recoded the responses given in the continuous task as binary. Other ways of completing this analysis, which attempted to take into account the additional information available in the continuous tasks (such as linear probability models), found similar results. 
 
@@ -177,22 +176,22 @@ In Figure~\ref{figure:continuousResponses} are reported the distributions of res
 \clearpage
 \newpage
 \section{Alternative analyses}
-So, the above (pre-registered) analyses indicate no substantial differences between the binary choice and strength-of-preference tasks. Some remaining possibilities are that the \emph{pattern} of attention is different between these two tasks. Possible metrics that might capture these differences are:
+In the following we look to see if the \emph{pattern} of attention is different between these two tasks. 
 
 \subsection{Number of fixations}
 Here, we operationalized ``number of fixations'' as 
-
 \begin{equation}
-	\frac{N_{right}}{N_{left}+N_{right}}
+	\frac{N_\text{right}}{N_\text{left}+N_\text{right}}
 \end{equation}
 where $N_i$ is the number of fixation on option $i$. 
 
-There was significant variance of participant on proportion of number of fixations, $\chi^2(1)=25.97$, $p<.001$. Therefore, the model included fixed effects of task, attention and value with their interactions and a random effect of participant on the intercepts. 
+There was significant variance of participant on proportion of number of fixations, $\chi^2(1)=25.97$, $p<.001$. Therefore, the model included fixed effects of task, attention and value with their interactions and a random effect of participant on the intercepts. As shown in Table~\ref{table:nFixModel}, nothing really came out. 
 
 \input{tables/nFixModel.tex}
 
-As shown in Table~\ref{table:nFixModel}, nothing really came out. 
 
+
+\clearpage
 \subsection{Duration of fixations}
 Here, duration of fixations was operationalized as 
 \begin{equation}
