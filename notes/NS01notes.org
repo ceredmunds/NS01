@@ -13,16 +13,28 @@ NS01 notes -*- mode: org -*-
 ** DONE Add analyses without removing rt trials
 ** DONE Does overall value predict RT in binary choice but not evaluation task?
 ** DONE emmeans - levels for delta_A, delta_V, task (draw model predictions)
-** TODO Check you did random variables correct for predict
+** DONE Check you did random variables correct for predict
 ** DONE Graphs of choice - predict if logistic, type=response
-** TODO Sort N in tables
+** DONE Sort N in tables
 ** DONE Look at difference between block 1 and block 2 in terms of choice model (Table 2)
 ** DONE Two graphs of continuous scale usage for blocks 1 and 2
-** TODO Make slides
+** TODO Take jitter off line graphs
+** TODO Log-odds graph, with choice probabilities on the labelled scale (y-axis)
+** TODO RT models by block
+** TODO Make choice graphs with hypothetical interactions (i.e. lower CI and upper CI)
+** TODO Histogram of continuous responses by person (facet_grid)
 ** TODO Last gaze predicts choice?
 ** TODO Gaze cascade effect?
+
+* Slides
+** Describe experiment
+** Get /why/ from Tim/Neil
+** 
 
 * Files
 + [[~/NS01/analysis/NS01analysis.R][Analysis file]] :: Most up-to-date analysis
 + [[~/NS01/techReport/NS01techReport.tex][Tech report]] :: Write up of rationale, method and results (so far). 
+
+* Notes from meeting 24/6 (Hangouts)
+s
 
