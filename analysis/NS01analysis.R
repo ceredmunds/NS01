@@ -5,7 +5,7 @@ rm(list=ls())
 
 require(data.table); require(plyr); require(ggplot2); require(MuMIn); require(wesanderson)
 require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4); library(merTools);
-require(nlme); require(emmeans)
+require(nlme); require(emmeans); require(gridExtra)
 
 require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
 
@@ -96,12 +96,12 @@ anova(rt.random.intercept.only, rt.intercept.only, rt.random.intercept.slope.att
 # Full model (i.e. including fixed effects)
 rt.full <- lmer(rt ~ task*abs.attention.diff*abs.value.diff +
                   (abs.attention.diff + abs.value.diff||participantNo),
-               data=data[task!="valuation" & block==1,],
+               data=data[task!="valuation",],
                control=lmerControl(optimizer="Nelder_Mead"))
 summary(rt.full) # Model summary
 confint(rt.full) # Get 0.95 confidence intervals
 stargazer(rt.full, type="latex",
-  title="Summary of coefficients of model predicting reaction time",
+  title="Summary of coefficients of model predicting reaction time across both blocks.",
   covariate.labels=c("Task", "$\\vert\\Delta_A\\vert$", "$\\vert\\Delta_V\\vert$",
                      "Task : $\\vert\\Delta_A\\vert$", "Task : $\\vert\\Delta_V\\vert$",
                      "$\\vert\\Delta_A\\vert$ : $\\vert\\Delta_V\\vert$",
@@ -111,7 +111,51 @@ stargazer(rt.full, type="latex",
   notes="\\footnotesize $\\vert\\Delta_A\\vert$ = absolute attention difference; $\\vert\\Delta_V\\vert$ = absolute value difference; ",
   notes.append=F, notes.align="l") # Print table to file
 
-# Graph of attention and value on reaction time (think by quartiles)
+# Block 1
+rt.full1 <- lmer(rt ~ task*abs.attention.diff*abs.value.diff +
+                  (abs.attention.diff + abs.value.diff||participantNo),
+                data=data[task!="valuation" & block==1,],
+                control=lmerControl(optimizer="Nelder_Mead"))
+summary(rt.full1) # Model summary
+confint(rt.full1) # Get 0.95 confidence intervals
+stargazer(rt.full1, type="latex",
+          title="Summary of coefficients of model predicting reaction time in Block 1.",
+          covariate.labels=c("Task", "$\\vert\\Delta_A\\vert$", "$\\vert\\Delta_V\\vert$",
+                             "Task : $\\vert\\Delta_A\\vert$", "Task : $\\vert\\Delta_V\\vert$",
+                             "$\\vert\\Delta_A\\vert$ : $\\vert\\Delta_V\\vert$",
+                             "Task : $\\vert\\Delta_A\\vert$ :  $\\vert\\Delta_V\\vert$"),
+          out="../techReport/tables/RTmodelBlock1.tex", style="default", ci=T, single.row=T,
+          label="table:rtModelBlock1", table.placement="t",
+          notes="\\footnotesize $\\vert\\Delta_A\\vert$ = absolute attention difference; $\\vert\\Delta_V\\vert$ = absolute value difference; ",
+          notes.append=F, notes.align="l") # Print table to file
+
+# Block 2 only 
+rt.full2 <- lmer(rt ~ task*abs.attention.diff*abs.value.diff +
+                  (abs.attention.diff + abs.value.diff||participantNo),
+                data=data[task!="valuation" & block==2,],
+                control=lmerControl(optimizer="Nelder_Mead"))
+summary(rt.full2) # Model summary
+confint(rt.full2) # Get 0.95 confidence intervals
+stargazer(rt.full2, type="latex",
+          title="Summary of coefficients of model predicting reaction time in Block 2.",
+          covariate.labels=c("Task", "$\\vert\\Delta_A\\vert$", "$\\vert\\Delta_V\\vert$",
+                             "Task : $\\vert\\Delta_A\\vert$", "Task : $\\vert\\Delta_V\\vert$",
+                             "$\\vert\\Delta_A\\vert$ : $\\vert\\Delta_V\\vert$",
+                             "Task : $\\vert\\Delta_A\\vert$ :  $\\vert\\Delta_V\\vert$"),
+          out="../techReport/tables/RTmodelBlock2.tex", style="default", ci=T, single.row=T,
+          label="table:rtModelBlock2", table.placement="t",
+          notes="\\footnotesize $\\vert\\Delta_A\\vert$ = absolute attention difference; $\\vert\\Delta_V\\vert$ = absolute value difference; ",
+          notes.append=F, notes.align="l") # Print table to file
+
+# Full model (i.e. including fixed effects) & main effect of taskOrder
+rt.full.order <- lmer(rt ~ task*abs.attention.diff*abs.value.diff*taskOrder +
+                  (abs.attention.diff + abs.value.diff||participantNo),
+                data=data[task!="valuation",],
+                control=lmerControl(optimizer="Nelder_Mead"))
+summary(rt.full.order) # Model summary
+confint(rt.full.order) # Get 0.95 confidence intervals
+
+# Graph of attention and value on reaction time (think by quartiles) -------------------------------
 rt.graph.data <- data[task!="valuation" & block==1,]
 rt.graph.data[, att.quartile:= cut(abs.attention.diff,
                                        quantile(abs.attention.diff, probs=0:4/4),
@@ -143,40 +187,6 @@ ggplot(rt.graph.summary.data, aes(group=as.factor(att.quartile), y=meanRT, x=abs
 ggsave('../techReport/images/RTattentionValueGraph.pdf', height=3.5, width=6, units="in")
 
 # RT model fit graph -------------------------------------------------------------------------------
-
-# predict.rt.graph.data <- rt.graph.data[, fit:=predict(rt.full, newdata = rt.graph.data, type="response")]
-#
-#
-# # predict.rt.graph.summary.data <- dcast(predict.rt.graph.data, task + att.quartile + abs.value ~ .,
-# #                                fun=mean, value.var="rt")
-# # colnames(predict.rt.graph.summary.data)[4] <- "rt"
-#
-# predict.rt.graph.summary.data <- predict.rt.graph.data[, .(meanRT=mean(fit), sd=sd(fit), N=.N),
-#                                                        by=.(task, att.quartile, abs.value)]
-# predict.rt.graph.summary.data[, ci:=qnorm(0.95)*sd/sqrt(N)]
-#
-# predict.rt.graph.summary.data <- predict.rt.graph.summary.data[abs.value%%1==0,]
-#
-# # New facet label names for task variable
-# task.labs <- c("Binary choice", "Strength-of-preference")
-# names(task.labs) <- c("binary", "continuous")
-#
-# ggplot(predict.rt.graph.summary.data, aes(group=as.factor(att.quartile), y=meanRT, x=abs.value)) +
-#   geom_point(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5)) +
-#   geom_line(aes(color=as.factor(att.quartile)), position=position_dodge(width=0.5), linetype = "dashed") +
-#   geom_errorbar(aes(ymin=meanRT-ci, ymax=meanRT+ci, color=as.factor(att.quartile)),
-#                 position=position_dodge(width=0.5)) +
-#   facet_grid(. ~ task,
-#              labeller=labeller(task=task.labs)) +
-#   labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
-#   theme_bw() +
-#   coord_cartesian(ylim=c(1000, 4500)) +
-#   scale_color_manual(values=wes_palette(n=4, name="Zissou1")) +
-#   theme(legend.background = element_rect(size=0.2, linetype="solid",
-#                                          colour ="black"))
-# ggsave('../techReport/images/predictedRTattentionValueGraph.pdf', height=3.5, width=6, units="in")
-
-require(emmeans)
 predict.rt <- as.data.table(emmeans(rt.full, ~ abs.attention.diff * abs.value.diff * task,
                       at = list(abs.attention.diff =
                                   quantile(data[task!="valuation" & block==1,
@@ -186,9 +196,9 @@ predict.rt[, abs.attention.diff:=factor(abs.attention.diff, labels=c('small', 'm
 
 ggplot(predict.rt, aes(x=abs.value.diff, y=emmean, group=abs.attention.diff,
                        color=abs.attention.diff)) +
-  geom_point(position=position_dodge(width=0.5), size=2) +
-  geom_line(position=position_dodge(width=0.5), size=1) +
-  geom_errorbar(aes(ymin=lower.CL, ymax=upper.CL), position=position_dodge(width=0.5), size=0.4) +
+  geom_point(size=2) +
+  geom_line( size=1) +
+  geom_errorbar(aes(ymin=asymp.LCL, ymax=asymp.UCL), size=0.4) +
   facet_grid(.~task, labeller=labeller(task=task.labs)) +
   labs(x="Value difference", y="Reaction time (ms)", color="Attention \ndifference") +
   theme_bw() +
@@ -296,6 +306,24 @@ ggplot(data[task=="continuous",], aes(x=response)) +
   theme_bw()
 ggsave("../techReport/images/continuousResponses.pdf", units="in", width=6, height=4)
 
+pdf("../techReport/images/contResponsesPerPpt.pdf", onefile = TRUE, width=7, height=10)
+cont.response.blk1 <- ggplot(data[task=="continuous" & taskOrder==1,], 
+                             aes(x=response)) +
+  geom_histogram(binwidth=0.02, color=wes_palette(n=5, name="Zissou1")[1]) +
+  scale_fill_manual(values=) +
+  facet_wrap(~participantNo) +
+  labs(x="Response", y="Count") +
+  theme_bw()
+
+cont.response.blk2 <- ggplot(data[task=="continuous" & taskOrder==2,], 
+                             aes(x=response, color=as.factor(taskOrder))) +
+  geom_histogram(binwidth=0.02, color=wes_palette(n=5, name="Zissou1")[4]) +
+  facet_wrap(~participantNo) +
+  labs(x="Response", y="Count") +
+  theme_bw()
+grid.arrange(cont.response.blk1, cont.response.blk2, nrow=2)
+dev.off()
+
 # Plot predicted choices ---------------------------------------------------------------------------
 summary(choice.full.block1)
 
@@ -303,18 +331,17 @@ predict.choice <- as.data.table(emmeans(choice.full.block1, ~ attention.differen
                                         at=list(attention.difference =
                                                   quantile(data[task!="valuation" & block==1,
                                                                 attention.difference], c(.25, .5, .75)),
-                                                value.difference=-6:6),
-                                        type = "response"))
-predict.choice
+                                                value.difference=-6:6)))
 predict.choice[, attention.difference:=factor(round(attention.difference, 2))]
 
-ggplot(predict.choice, aes(x=value.difference, y=prob, group=attention.difference,
+ggplot(predict.choice, aes(x=value.difference, y=emmean, group=attention.difference,
                        color=attention.difference)) +
-  geom_point(position=position_dodge(width=0.5), size=2) +
-  geom_line(position=position_dodge(width=0.5), size=1) +
-  geom_errorbar(aes(ymin=asymp.LCL, ymax=asymp.UCL), position=position_dodge(width=0.5), size=0.4)+
+  geom_point(size=2) +
+  geom_line(size=1) +
+  geom_errorbar(aes(ymin=asymp.LCL, ymax=asymp.UCL), size=0.4)+
+  scale_y_continuous(name="Choice", breaks=seq(-7.5, 7.5, by=2.5), labels=round(invlogit(seq(-7.5, 7.5, by=2.5)), 2)) +
   facet_grid(.~task, labeller=labeller(task=task.labs)) +
-  labs(x="Value difference", y="Choice", color="Attention \ndifference") +
+  labs(x="Value difference",color="Attention \ndifference") +
   theme_bw() +
   scale_color_manual(values=wes_palette(n=4, name="Zissou1")) +
   theme(legend.background = element_rect(size=0.2, linetype="solid",

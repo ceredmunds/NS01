@@ -11,18 +11,11 @@ NS01 notes -*- mode: org -*-
 ** DONE Look to see whether order effect in length of fixations
 ** DONE Rerun rt models with all different types of attention
 ** DONE Add analyses without removing rt trials
-** DONE Does overall value predict RT in binary choice but not evaluation task?
-** DONE emmeans - levels for delta_A, delta_V, task (draw model predictions)
-** DONE Check you did random variables correct for predict
-** DONE Graphs of choice - predict if logistic, type=response
-** DONE Sort N in tables
-** DONE Look at difference between block 1 and block 2 in terms of choice model (Table 2)
-** DONE Two graphs of continuous scale usage for blocks 1 and 2
-** TODO Take jitter off line graphs
-** TODO Log-odds graph, with choice probabilities on the labelled scale (y-axis)
-** TODO RT models by block
+** DONE Remove jitter on prediction graphs
+** DONE Log-odds graph, with choice probabilities on the labelled scale (y-axis)
+** DONE RT models by block
 ** TODO Make choice graphs with hypothetical interactions (i.e. lower CI and upper CI)
-** TODO Histogram of continuous responses by person (facet_grid)
+** DONE Histogram of continuous responses by person (facet_grid)
 ** TODO Last gaze predicts choice?
 ** TODO Gaze cascade effect?
 
