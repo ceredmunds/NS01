@@ -54,6 +54,11 @@
 \section{Notes}
 People to email results: najmi.husaini@warwick.ac.uk
 
+\subsection{Issues}
+\begin{enumerate}
+	\item What does the interaction mean for rt? (normed vs. not?)
+\end{enumerate}
+
 \section{Rationale}
 
 EQ4D
@@ -99,21 +104,31 @@ As pre-registered, participants were excluded on a task by task basis. In previo
 
 We also pre-registered excluding trials for which the reaction time was less than $200ms$ or greater than the mean plus three standard deviations (this boundary was calculated across all trials). This resulted in $2.04\%$ of trials being removed from the strength-of-preference task, and $1.23\%$ of trials removed from the binary task. The maximum number of trials excluded for a single participant was $15$. There was no difference in the models if we included the information from all trials (see Appendix). 
 
-\subsection{Operationalizing attention and value}
-Before proceeding to the analysis, a quick note on the measures we constructed and used in the mixed random effects models below. Value was incorporated in the models as ``difference in value'' 
+Finally, there was one trial in the binary task where the participant was not registered as looking at either option. We removed this trial as it causes issues for calculating measures of attention. 
+
+\subsection{Operationalizing value and attention}
+Before proceeding to the analysis, here we briefly review the measures that are used in the mixed random effects models of choice below. Value was incorporated in the models as ``difference in value'' 
 \begin{equation}
 	\Delta_V = V_\text{right} - V_\text{left}	
 \end{equation}
-where $V_i$ is the value of each stimulus taken from participants' judgements in the final valuation task. Attention was incorporated in the models as ``difference in attention''
+where $V_i$ is the value of each stimulus taken from participants' judgements in the final valuation task. Attention was incorporated in the model as 
 \begin{equation}
-	\Delta_A = \frac{A_{right}-A_{left}}{RT}	
+	A = \frac{A_\text{left}}{A_\text{left}+A_\text{right}}
 \end{equation}
-where $A_i$ is the total time spent fixating on option $i$ and $RT$ is the reaction time.\footnote{Note that other ways of normalizing attention such as time spent on task or time spent looking at the two options made no difference. See section below.}
+where $A_i$ is the total time spent fixating on option $i$. Finally, the interaction between value and attention was defined as
+\begin{equation}
+	\text{Interaction} = V_\text{left} A_\text{left} - V_\text{right} A_\text{right}.
+\end{equation}
+This interaction corresponds to the interaction term in the aDDM. For a proof, please see the Appendix. 
 
-In the models of reaction time, $\Delta_A$ and $\Delta_V$ were similarly defined, although the absolute value of each construct was taken as there is no reason to predict that participants would respond faster to the left (or right). Rather, we would expect participants to respond faster the greater the absolute difference between the options. 
+To predict reaction time, the constructs were defined similarly. For value and the interaction, we took the absolute value. For attention, we calculated
+\begin{equation}
+	|A| = \left| \frac{A_\text{left}}{A_\text{left}+A_\text{right}} - 0.5 \right| 
+\end{equation}
+so that the value of $|A|$ varied between zero and a half. These recoded variables were necessary as there was no reason to predict that participants would respond faster to a particular side or particular value. Rather, we would expect participants to respond faster the greater the absolute difference between the options in both attention or value. 
 
 \subsection{Predicting reaction times}
-There was a significant interaction between task order and condition on reaction time, $t(3)=8.01$, $SE=79.51$, $p<.001$. Participants who completed the continuous task first were faster than those that completed it second, whereas participants who completed the binary task first were slower than those that completed it second (see Figure~\ref{figure:RTblockGraph}). Further, the four-way interaction of task, attention, value with task order was marginal, $t=1.88$, $SE=139.16$, $p=.060$. So, as preregistered, in the following we only considered information from the first block. 
+There was a significant interaction between task order and condition on reaction time, $t(3)=8.00$, $SE=79.52$, $p<.001$. Participants who completed the continuous task first were faster than those that completed it second, whereas participants who completed the binary task first were slower than those that completed it second (see Figure~\ref{figure:RTblockGraph}). 
 
 \begin{figure}
 	\centering
@@ -124,11 +139,10 @@ There was a significant interaction between task order and condition on reaction
 
 \input{tables/RTmodels.tex}
 
-There was a significant variance in reaction time intercepts across participants, $SD=1114.18$ (95\% CI: 900.45, 1378.63), $\chi^2(1)=1375.60$, $p<.001$. Additionally, slopes based on absolute difference in attention ($|\Delta_A|$) significantly varied across participants, $SD=556.09$ (95\% CI: 275.62, 1121.96), $\chi(1)=8.21$, $p=.004$. As did the slopes based on absolute difference in value ($|\Delta_V|$), $SD=90.54$ (95\% CI: 52.81, 155.24), $\chi(1)=8.34$, $p=.004$. Therefore, the final model included main effects of task, attention and value, with random effects of attention and value. 
+There was a significant variance in reaction time intercepts across participants, $SD=1114.18$ (95\% CI: 900.45, 1378.63), $\chi^2(1)=1375.60$, $p<.001$. Additionally, slopes based on absolute difference in attention ($|A|$) significantly varied across participants, $SD=556.09$ (95\% CI: 275.62, 1121.96), $\chi(1)=11.35$, $p=.001$. As did the slopes based on absolute difference in value ($|\Delta_V|$), $SD=90.54$ (95\% CI: 52.81, 155.24), $\chi(1)=8.21$, $p=.004$. Therefore, the final model included main effects of task, attention and value, with random effects of attention and value. 
 
 \input{tables/RTmodelBlock1.tex}
 \input{tables/RTmodelBlock2.tex}
-
 
 \begin{figure}[b!]
 	\centering
@@ -144,14 +158,29 @@ There was a significant variance in reaction time intercepts across participants
 	\label{figure:predictedRTattentionValueGraph}
 \end{figure}
 
-Table~\ref{table:rtModel} contains the coefficients and 95\% confidence intervals for the fixed effects in the full reaction time model (see Figure~\ref{figure:RTattentionValueGraph}). In summary, reaction times were significantly predicted by difference in attention, $t=2.44$, $SE=318.49$, $p=.015$. The greater the difference in amount of attention between the two options, the faster the participant responded. There was also an effect of difference in value, $t=2.03$, $SE=43.70$, $p=.043$. The greater the difference in value between the choices, the faster participants responded. The main effect of task, the two-way and three-way interactions did not reach significance ($p>=0.331$). 
+Table~\ref{table:RTmodelBlock1} contains the coefficients and 95\% confidence intervals for the fixed effects in the full reaction time model for the first block (see Figure~\ref{figure:RTattentionValueGraph}). In summary, reaction times were significantly predicted by absolute attention, $t=3.05$, $SE=477.08$, $p=$. The greater the difference in amount of attention between the two options, the faster the participant responded. There was also an effect of absolute difference in value, $t=2.04$, $SE=43.70$, $p=.043$. The greater the difference in value between the choices, the faster participants responded. The main effect of task, the two-way and three-way interactions did not reach significance ($p>=0.331$). 
 
 \subsection{Choice}
 To consider a mixed effects model of choice, we recoded the responses given in the continuous task as binary. Other ways of completing this analysis, which attempted to take into account the additional information available in the continuous tasks (such as linear probability models), found similar results. 
 
-There was no interaction between task and order on choice, $p=.766$. Additionally, a main effects analysis found the four-way interaction was not significant, $p=.999$. However, there was a significant effect of task order on reaction time, so here we report an analysis of the first block only. 
+There was no interaction between task and order on choice, $p=.766$. Additionally, a main effects analysis found the four-way interaction was not significant, $p=.999$. However, there was a significant effect of task order on reaction time.
 
-There was a significant random effect of difference in attention on choice, $\chi^2(1)=1791.02$, $p<.001$. There was also a random effect of difference in value on choice, $\chi^2(1)=1341.70$, $p<.001$. A random effect of task did not add additional information, $\chi^2(3)=0.46$, $p=.928$. Therefore, the final model included fixed effects of task, attention and value, with random effects of attention and value.
+There was a significant random effect of difference in value on choice, $\chi^2(3)=2081.55$, $p<.001$. Adding random slopes of attention significantly added to the model, $\chi^2(1)=857.88$, $p<.001$, whereas also adding a random effect of task did not, $\chi^2(3)=0.67$, $p=.881$. However, adding random slopes based on the attention resulted in the models not converging, so we drop this term in the following models. 
+
+\input{tables/choiceByTask}
+\input{tables/choiceByTaskBlock1.tex}
+\input{tables/choiceByTaskBlock2.tex}
+
+\begin{figure}
+	\includegraphics[height=\textheight]{images/parameterEstimates}
+	\caption{Parameter estimates with unstandardised coefficients. Error bars are 95\% confidence intervals.}	
+\end{figure}
+
+\begin{figure}
+	\includegraphics[height=\textheight]{images/parameterEstimatesScaled}
+	\caption{Parameter estimates with standardised coefficients. Error bars are 95\% confidence intervals.}	
+\end{figure}
+
 
 Table~\ref{table:choiceModelBlock1} contains the coefficients and 95\% confidence intervals for the fixed effects in the full choice model for the first block only (the preregistered analysis). Choice was significantly predicted by attention, $t(1)=12.89$, $SE=0.44$, $p<.001$, and value, $t(1)=14.28$, $SE=0.06$, $p<.001$. In other words, the picture that was looked at more was more likely to be picked, as was the picture that the participant preferred. The main effect of task, as well as two- and three-way interactions did not reach significance ($p>=.168$). The predicted choice probabilities are shown in Figure~\ref{figure:predictedChoiceGraph}.
 
@@ -168,90 +197,92 @@ Table~\ref{table:choiceModelBlock1} contains the coefficients and 95\% confidenc
 
 Also included are the outputs for both blocks together (Table~\ref{table:choiceModelAll}) and for the final block on its own (Table~\ref{table:choiceModelBlock2}). The final block version is perhaps interesting as the reaction time analyses showed that the difference in reaction was greater for the second block than the first. Although this did change the coefficients slightly, the confidence intervals are still securely including 0. 
 
-\subsection{Distribution of continuous responses}
-In Figure~\ref{figure:continuousResponses} are reported the distributions of responses given by participants. 
-
-\begin{figure}[!b]
-	\centering
-	\includegraphics{images/continuousResponses}
-	\caption{Histogram of the responses given by participants in the continuous task, separated by task order.}
-	\label{figure:continuousResponses}
-\end{figure}
-
-\begin{figure}[!]
-	\centering
-	\includegraphics[width=0.95\textwidth]{images/contResponsesPerPpt.pdf}
-	\caption{Histograms of the responses given by participants in the continuous, per person. The upper half are those that received the task in Block 1, the bottom half, those that received it in Block 2.}
-	\label{figure:contResponsesPerPpt}	
-\end{figure}
-
-
-\clearpage
-\newpage
-\section{Alternative analyses}
-In the following we look to see if the \emph{pattern} of attention is different between these two tasks. 
-
-\subsection{Number of fixations}
-Here, we operationalized ``number of fixations'' as 
-\begin{equation}
-	\frac{N_\text{right}}{N_\text{left}+N_\text{right}}
-\end{equation}
-where $N_i$ is the number of fixation on option $i$. 
-
-There was significant variance of participant on proportion of number of fixations, $\chi^2(1)=25.97$, $p<.001$. Therefore, the model included fixed effects of task, attention and value with their interactions and a random effect of participant on the intercepts. As shown in Table~\ref{table:nFixModel}, nothing really came out. 
-
-\input{tables/nFixModel.tex}
+\section{Interaction affected by task}
 
 
 
-\clearpage
-\subsection{Duration of fixations}
-Here, duration of fixations was operationalized as 
-\begin{equation}
-	\frac{D_{right}}{D_{left} + D_{right}}
-\end{equation}
-where $D_i$ was the mean duration of fixations on option $i$. 
+%\subsection{Distribution of continuous responses}
+%In Figure~\ref{figure:continuousResponses} are reported the distributions of responses given by participants. 
+%
+%\begin{figure}[!b]
+%	\centering
+%	\includegraphics{images/continuousResponses}
+%	\caption{Histogram of the responses given by participants in the continuous task, separated by task order.}
+%	\label{figure:continuousResponses}
+%\end{figure}
+%
+%\begin{figure}[!]
+%	\centering
+%	\includegraphics[width=0.95\textwidth]{images/contResponsesPerPpt.pdf}
+%	\caption{Histograms of the responses given by participants in the continuous, per person. The upper half are those that received the task in Block 1, the bottom half, those that received it in Block 2.}
+%	\label{figure:contResponsesPerPpt}	
+%\end{figure}
+%
+%\newpage
+%\clearpage
+%
+%\section{Alternative analyses}
+%In the following we look to see if the \emph{pattern} of attention is different between these two tasks. 
+%
+%\subsection{Number of fixations}
+%Here, we operationalized ``number of fixations'' as 
+%\begin{equation}
+%	\frac{N_\text{right}}{N_\text{left}+N_\text{right}}
+%\end{equation}
+%where $N_i$ is the number of fixation on option $i$. 
+%
+%There was significant variance of participant on proportion of number of fixations, $\chi^2(1)=25.97$, $p<.001$. Therefore, the model included fixed effects of task, attention and value with their interactions and a random effect of participant on the intercepts. As shown in Table~\ref{table:nFixModel}, nothing really came out. 
+%
+%\input{tables/nFixModel.tex}
 
-Including random effects did not improve the explanatory power of this model. Further, as seen in Table~\ref{table:durFixModel}, nothing came out. 
-
-\input{tables/durFixModel.tex}
-
-\clearpage
-\newpage
-\subsection{Looking at different ways of operationalizing attention}
-In the above analyses, attention was operationalized as 
-
-\begin{equation}
-	\frac{T_{right}-T_{left}}{RT}	
-\end{equation}
-where $T_i$ is the total time spent fixating on option $i$ and $RT$ is the reaction time. 
-
-However, previously Tim has used
-
-\begin{equation}
-	\frac{T_{right}-T_{left}}{T_{right}+T_{left}}
-\end{equation}
-where attention is normalized out of the total time spent looking at options. 
-
-Also, CERE noticed that participants appear to spend more time looking at the Likert scale in the strength-of-preference task than in the binary task. Especially when the participants appeared to be undecided between the two options. Therefore, 
-
-\begin{equation}
-	\frac{T_\text{right}-T_\text{left}}{T_\text{right}+T_\text{left}+T_\text{likert}}
-\end{equation}
-is a measure of difference of attention normalised by time spent on task. 
-\input{tables/choiceModelAttention.tex}
-
-\input{tables/rtModelAttention.tex}
-
-Mainly because (as shown in Figure~\ref{figure:attentionCorrelations}) they all correlate pretty perfectly. 
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.7\textwidth]{images/attentionCorrelations}
-	\caption{Correlations between different metrics of attention}
-	\label{figure:attentionCorrelations}
-\end{figure}
-
+%\clearpage
+%\subsection{Duration of fixations}
+%Here, duration of fixations was operationalized as 
+%\begin{equation}
+%	\frac{D_{right}}{D_{left} + D_{right}}
+%\end{equation}
+%where $D_i$ was the mean duration of fixations on option $i$. 
+%
+%Including random effects did not improve the explanatory power of this model. Further, as seen in Table~\ref{table:durFixModel}, nothing came out. 
+%
+%\input{tables/durFixModel.tex}
+%
+%\clearpage
+%\newpage
+%\subsection{Looking at different ways of operationalizing attention}
+%In the above analyses, attention was operationalized as 
+%
+%\begin{equation}
+%	\frac{T_{right}-T_{left}}{RT}	
+%\end{equation}
+%where $T_i$ is the total time spent fixating on option $i$ and $RT$ is the reaction time. 
+%
+%However, previously Tim has used
+%
+%\begin{equation}
+%	\frac{T_{right}-T_{left}}{T_{right}+T_{left}}
+%\end{equation}
+%where attention is normalized out of the total time spent looking at options. 
+%
+%Also, CERE noticed that participants appear to spend more time looking at the Likert scale in the strength-of-preference task than in the binary task. Especially when the participants appeared to be undecided between the two options. Therefore, 
+%
+%\begin{equation}
+%	\frac{T_\text{right}-T_\text{left}}{T_\text{right}+T_\text{left}+T_\text{likert}}
+%\end{equation}
+%is a measure of difference of attention normalised by time spent on task. 
+%\input{tables/choiceModelAttention.tex}
+%
+%\input{tables/rtModelAttention.tex}
+%
+%Mainly because (as shown in Figure~\ref{figure:attentionCorrelations}) they all correlate pretty perfectly. 
+%
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=0.7\textwidth]{images/attentionCorrelations}
+%	\caption{Correlations between different metrics of attention}
+%	\label{figure:attentionCorrelations}
+%\end{figure}
+%
 \clearpage
 \section{Overall value}
 
@@ -272,10 +303,10 @@ Of course, using this model is silly because this collapses across tasks. Theref
 The analysis was pre-registered at \url{AsPredicted.org/19698}. The data and analysis of this experiment is available in the Open Science Framework \url{https://osf.io/xfc8a/}. 
 
 
-
-
 \clearpage
 \section{Appendix}
+\subsection{Derivation of interaction term}
+
 \subsection{Choice model including all trials}
 Here, we consider the model of choice including all trials (i.e. no exclusions based on reaction time) for the first block. The model for the second block is similar. 
 

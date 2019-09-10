@@ -24,16 +24,16 @@ if (combine){
            new=c("participantNo", "lValueIAPS", "rValueIAPS"))
   behavData[task=="likert", `:=`(task="valuation")]
   behavData[, c("rowN", "taskOrder", "xBoxPos", "yBoxPos", "response", "RT"):= NULL]
-  behavData[, `:=`(trial=1:300, taskOrder=c(rep(1, 50), rep(2, 50), rep(3, 200)), blockTrial=1:50)]
+  
+  nPpts <- length(unique(behavData$participantNo))
+  behavData[, `:=`(trial=rep(1:300, nPpts), taskOrder=rep(c(rep(1, 50), rep(2, 50), rep(3, 200)), nPpts))]
 
   fixations <- merge(data, behavData, allow=TRUE, by=c("participantNo", "trial", "task"))
-  fixations[, blockTrial.x:=NULL]
 
   # Get subjective values
   values <- as.data.table(dcast(fixations[task=="valuation",],
                                 participantNo + rImage + response ~ .)[, 1:3])
-
-
+  
   values[, meanValue:=mean(response), by=c("participantNo", "rImage")]
   values[, response:=NULL]
   values <- unique(values)
@@ -41,8 +41,8 @@ if (combine){
   fixations <- merge(fixations, values, all.x=TRUE, allow=TRUE, by=c("participantNo", "rImage"))
   fixations <- merge(fixations, values, all.x=TRUE, allow=TRUE, by.x=c("participantNo", "lImage"),
                      by.y=c("participantNo", "rImage"))
-  setnames(fixations, old=c("meanValue.x", "meanValue.y", "blockTrial.y"),
-           new=c("rValue", "lValue", "blockTrial"))
+  setnames(fixations, old=c("meanValue.x", "meanValue.y"),
+           new=c("rValue", "lValue"))
 
   setcolorder(fixations,
               c("DAU", "participantNo", "age", "gender", "eye", "trial", "task", "taskOrder", "block",
@@ -57,7 +57,6 @@ if (combine){
   fixations[, fixEndTr:=ifelse(fixEnd<trialStartTime, trialStartTime, fixEnd)]
   fixations[, fixEndTr:=ifelse(fixEndTr>trialFinishTime, trialFinishTime, fixEndTr)]
   fixations[, fixLengthTr:=fixEndTr-fixStartTr]
-  fixations[, fixLengthProp:=fixLengthTr/rt]
 
   # Flag fixations during choice
   fixations[, intra_choice:=ifelse(fixLengthTr>0, 1, 0)]
@@ -70,7 +69,7 @@ if (combine){
   fixations[task=="continuous", response:= (response-1.0)/99.0]
 
   # Write data
-  fwrite(fixations, "/Users/arlo/Documents/DAUs/NS01/analysis/NS01fixationsLong.csv", row.names=F)
+  fwrite(fixations, "NS01fixationsLong.csv", row.names=F)
 
   if (nrow(data)==nrow(fixations)){
     rm(list=ls())
