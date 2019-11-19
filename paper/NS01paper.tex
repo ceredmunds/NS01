@@ -8,6 +8,10 @@
 \usepackage{nameref}
 \usepackage{amsmath}
 
+\usepackage{stackengine}
+\def\yenrule{\rule{1.3ex}{.1ex}}
+\def\textyen{\renewcommand\stacktype{L}\stackon[.4ex]{\stackon[.65ex]{Y}{\yenrule}}{\yenrule}}
+
 \title{Experimental exploration of attention in preferential choice}
 \shorttitle{Attention in choice}
 
@@ -25,7 +29,7 @@
 \section{Experiment 1} \label{exp:NS01} 
 \subsection{Method}
 \subsubsection{Participants}
-Data was collected from $67$ participants: $2$ of these were excluded because the eye-tracker would not initially calibrate and $12$ of these were excluded due to a coding error which meant the fixation cross did not work for them. This resulted in data being collected from $53$ participants. This is three more than pre-registered due to the vagaries of testing (i.e. trying to anticipate participants not showing up). All participants were recruited from the University of Warwick’s volunteer subject pool and paid \pounds10 for their participation.
+Data was collected from $67$ participants: $2$ of these were excluded because the eye-tracker would not initially calibrate and $12$ of these were excluded due to a coding error which meant the fixation cross did not work for them. This resulted in data being collected from $53$ participants. This is three more than pre-registered due to the vagaries of testing (i.e. trying to anticipate participants not showing up). All participants were recruited from the University of Warwick's volunteer subject pool and paid \pounds10 for their participation.
 
 \subsubsection{Apparatus}
 The participants were tested individually using an EyeLink 1000 Plus (SR Research, Osgoode, ON, Canada) eye-tracker. Monocular eye movements were recorded at 500Hz and fixations were identified by the eye tracker using velocity algorithms. The Areas of Interest were defined as a rectangle around the image position(s) on the screen. The experiment was displayed on a widescreen monitor (1920 x 1080 resolution, refresh). Participants were placed on a chin rest approximately 70cm away from the screen. Stimulus presentation was controlled by MATLAB using Psychtoolbox extensions \cite{Brainard1997, Pelli1997}.
@@ -96,18 +100,24 @@ Data was collected from $x$ participants: $y$ of these were excluded because the
 This experiment was delivered in the same manner as in \nameref{exp:NS01}. 
 
 \subsubsection{Design}
-This section describes the study's design.
+All participants completed Commensurate and Noncommensurate trials where they made choices between two lotteries in a counterbalanced order. Each lottery had three equally likely outcomes.
 
 \subsubsection{Stimuli and choices}
+All participants completed a total of 84 trials where they chose between the top and bottom lottery, each of which had three equally likely outcomes. The outcomes were displayed in three kinds of experimental currencies. The subjects were notified of the conversion rates for these experimental currencies into British pounds (\textyen 21 = \pounds1, \$83 = \pounds 1, and $Q88$ = \pounds1) at the beginning of the experiment, and also periodically as they made choices among lotteries.
+ 
+In the Commensurate Condition, all outcomes for both the lotteries (three in each) were in the same currency. Lotteries in this condition either had all outcomes in \textyen, \$, or $Q$ currency. We balanced and randomized the trials so that all three currencies were present equally through the trials in this condition. In the Non-Commensurate Condition, for both lotteries, one outcome was in \textyen, one outcome was in \pounds\space and one outcome was in $Q$ currency. In every trial, the participants were asked to select the lottery that they preferred. 
+
+Participants faced all trials of the Commensurate condition in one block, and did the same for all the trials of the Non-Commensurate condition. The order of the blocks was also randomized for each participant.
 
 \subsubsection{Procedure}
-The procedure was fairly straightforward, yet required
-attention to detail.
+The experiment was displayed on a black background with the six lottery outcomes presented in white text on a grey circle. At the beginning of the experiment the participants were asked to provide their age and gender. Then, participants completed 84 trials across two tasks: the Commensurate trials, and the NonCommensurate trials. Gamble outcomes, the order of the trials, and the blocks in which conditions were presented were all randomly determined for each participant. For each participant, the instructions for the tasks were shown, then the eye-tracker was calibrated and validated. At the beginning of each trial, a fixation cross was displayed in the center of the screen until the participant had looked at it. 
+
+In all trials, participants had to press the up key if they preferred the top lottery, and the down key if they preferred the bottom lottery. Reaction times were measured from the start of the trial to the pressing of the up or down key. The areas of interest were placed at a horizontal distance of 320 pixels, and a vertical distance of 340 pixels apart on the screen. A blank, black screen was displayed for 500ms between each trial. Throughout the experiment, the eye-tracker was refreshed every 21 trials. At the end of the experiment, participants were issued with a risk aversion questionnaire.
 
 \subsubsection{Data analysis}
 \nameref{exp:NS07} was pre-registered at \url{}.
 % Need to make and make public
-Areas of interest were defined as a 100 pixel circle around each stimulus. 
+Areas of interest were defined as the area of the stimulus, allowing for fixations up to 100 pixels from the centre of each stimuli circle. 
 
 \subsection{Results}
 
@@ -167,8 +177,7 @@ when staring at the right option. Here, $V_t$ is the value of the accumulator at
  
 \subsubsection{Note}
 Here, we are assuming that the time spent not looking at areas of interest is absorbed into the non-decision time of the ADDM. Otherwise, we would have $A_L + A_R + A_\text{none} = 1 $. This makes things a little more interesting, depending on what you assume the drift rate is whilst people are not fixating on options. The interaction term remains the same. However, if you assume that people are not accumulating when they are not staring at options the first term becomes $\theta(1-A_\text{none})(V_L-V_R)=\theta(A_L + A_R)(V_L - V_R)$. If instead you assume that participants accumulate at the rate $(V_L-V_R)$ you get $T_\text{none}(V_L-V_R)$. Finally, if you assume that participants accumulate at $\theta(V_L-V_R)$, then you get $\theta (V_L - V_R)$. 
-
-
+% CE: see p. 36-37 of notebook. 
 
 
 \end{document}
