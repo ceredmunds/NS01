@@ -138,6 +138,37 @@ Both experiments were preregistered (see above). In addition, the data and analy
 \section{Appendices}
 
 \subsection{Proof of interaction term}
+In the Attentional Drift Diffusion Model (ADDM), the change in the value of the accumulator at time $t$ is given by 
+\begin{equation}
+	\Delta_V = d(V_L - \theta V_R) + \epsilon_t
+\end{equation}
+when the participant is staring at the left option and
+\begin{equation}
+	\Delta_V = d(\theta V_L - V_R) + \epsilon_t
+\end{equation}
+when staring at the right option. Here, $V_t$ is the value of the accumulator at time $t$, $d$ is a constant that affects the rate of integration, $V_L$ and $V_R$ are the values of the two options, $\theta$ is a number between 0 and 1 that reflects the bias towards the fixated option, and $\epsilon_t$ is Gaussian noise with variance $\sigma^2$. 
+
+ This means that the final value of the accumulator, across all time $t$ in the trial, can be estimated by 
+ \begin{equation}
+ 	V_{t=T} = \sum_{t \in L} \left(V_L - \theta V_R\right) + \sum_{t \in R}	\left(\theta V_L - V_R\right) 
+ \end{equation}
+ where each term is summed over the amount of time spent fixating on either the left or right options. Then, this can be summarised as 
+ \begin{eqnarray}	
+ 	V_{t=T}&=& A_L\left(V_L -\theta V_R\right) + A_R \left(\theta V_L - V_R \right)\\
+ 	&=& A_L V_L - \theta A_L V_R + \theta A_R V_L - A_R V_R
+ \end{eqnarray}
+ where $A_i$ is the proportion of the time on task that participants looked at option $i$. Then, as $A_L + A_R = 1$, 
+ \begin{eqnarray}
+ 	V_{t=T} &=& A_L V_L -\theta(1-A_R)V_R + \theta(1-A_L) V_L - A_R V_R \\
+ 		  &=& A_L V_L -\theta V_R + \theta A_R V_R + \theta V_L - \theta A_L V_L - A_R V_R \\
+ 		  &=& \theta(V_L - V_R) + (1-\theta)(A_L V_L - A_R V_R). \label{eqn:interaction}
+ \end{eqnarray}
+ The first term of equation \ref{eqn:interaction} gives the main effect of value and the second term gives the interaction between value and attention. 
+ 
+\subsubsection{Note}
+Here, we are assuming that the time spent not looking at areas of interest is absorbed into the non-decision time of the ADDM. Otherwise, we would have $A_L + A_R + A_\text{none} = 1 $. This makes things a little more interesting, depending on what you assume the drift rate is whilst people are not fixating on options. The interaction term remains the same. However, if you assume that people are not accumulating when they are not staring at options the first term becomes $\theta(1-A_\text{none})(V_L-V_R)=\theta(A_L + A_R)(V_L - V_R)$. If instead you assume that participants accumulate at the rate $(V_L-V_R)$ you get $T_\text{none}(V_L-V_R)$. Finally, if you assume that participants accumulate at $\theta(V_L-V_R)$, then you get $\theta (V_L - V_R)$. 
+
+
 
 
 \end{document}
