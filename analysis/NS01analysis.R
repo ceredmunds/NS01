@@ -12,7 +12,7 @@ require(ggplot2); require(wesanderson); require(stargazer); require(GGally);
 # 
 # require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
 
-source("Preprocessing.R"); source('bsci.R')
+source("Preprocessing.R"); source('bsci.R'); source('NS01functions.R')
 
 # Remove excluded trials
 fixations <- fixations[exclude==0,]
@@ -24,13 +24,11 @@ data <- dcast(fixations, participantNo + task + taskOrder + block + trial + resp
                 lValue + rValue ~ aoi,
               fun = sum, value.var="fixLengthTr")
 
-data[, propAttentionLeft:=right/(right + left)]
+# Get predictors
+data[, propAttentionLeft:=left/(right + left)]
 data[, propAttentionRight:=1-propAttentionLeft]
-
-data[, attention.difference:= (right-left)/(right+left)]
-data[, value.difference:=rValue-lValue]
-
-data[, Timintr:= lValue*propAttentionLeft - rValue*propAttentionRight]
+data[, value.difference:=lValue-rValue]
+data[, interaction:= lValue*propAttentionLeft - rValue*propAttentionRight]
 
 # Recode responses to get binary responses from continuous task
 data[, recodedResponse:= response]
@@ -246,14 +244,16 @@ ggplot(data[task!="valuation",], aes(x=factor(value.difference), y=rt)) +
 # Order effects
 choice.order <- glm(recodedResponse ~ task*taskOrder, data=data[task!="valuation"],
                     family="binomial")
-choice.order.all <- glm(recodedResponse ~ task*taskOrder*attention.difference*value.difference,
+choice.order.all <- glm(recodedResponse ~ task*taskOrder*propAttentionLeft*value.difference,
                         data=data[task!="valuation"], family="binomial")
+
+data <- data[taskOrder==1,]
 
 # Determining random effects
 choice.intercept.only <- glm(recodedResponse ~ 1,
                               data=data[task!="valuation",], family="binomial")
 
-choice.random.intercept.only <- glmer(recodedResponse ~ 1 + 1|participantNo,
+choice.random.intercept.only <- glmer(recodedResponse ~ 1|participantNo,
                                     data=data[task!="valuation",], family="binomial",
                                     control=glmerControl(optimizer="Nelder_Mead"))
 
@@ -266,21 +266,16 @@ choice.random.intercept.slope.att.value <- glmer(recodedResponse ~
                                            data=data[task!="valuation",], family="binomial",
                                            control=glmerControl(optimizer="Nelder_Mead"))
 
-choice.random.intercept.slope.att.value.task <- glmer(recodedResponse ~
-  (propAttentionLeft +  value.difference + task)||participantNo,
-  data=data[task!="valuation",], family="binomial",
-  control=glmerControl(optimizer="Nelder_Mead"))
-
 anova(choice.random.intercept.only, choice.random.intercept.slope.value,
-      choice.random.intercept.slope.att.value, choice.random.intercept.slope.att.value.task,
+      choice.random.intercept.slope.att.value,
       test="Chisq")
 
 choice.full <- glmer(recodedResponse ~ task + propAttentionLeft + value.difference + 
-                       task:propAttentionLeft + task:value.difference + Timintr + task:Timintr +
-                      (1 + propAttentionLeft + value.difference||participantNo),
+                       task:propAttentionLeft + task:value.difference + interaction + task:interaction +
+                      (value.difference||participantNo),
                     data=data[task!="valuation",], family="binomial",
-                    control=glmerControl(optimizer="Nelder_Mead",
-                                         check.conv.grad=.makeCC("warning", tol=1e-1)))
+                    control=glmerControl(optimizer="bobyqa",
+                                         check.conv.grad=.makeCC("warning", tol=1)))
 
 summary(choice.full) # Model summary
 confint(choice.full, method="Wald") # Get 0.95 confidence intervals
@@ -290,7 +285,7 @@ stargazer(choice.full, type="latex",
                              "Task : $\\Delta_A$", "Task : $\\Delta_V$",
                              "$\\Delta_A$ : $\\Delta_V$",
                              "Task : $\\Delta_A$ :  $\\Delta_V$"),
-          out="../techReport/tables/choiceModelAll.tex", style="default", ci=T, single.row=T,
+          style="default", ci=T, single.row=T, out="../paper/tables/NS01choiceModel.tex",
           label="table:choiceModelAll", table.placement="!b",
           notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
           notes.append=F, notes.align="l") # Print table to file
