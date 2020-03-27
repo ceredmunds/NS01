@@ -26,6 +26,63 @@
 \begin{document}
 \maketitle
 
+
+It seems obvious that attention is important in value-based choice; after all, it seems as if the entire premise of advertising is set up to grab attention and keep it focused on the positives, and away from the negatives. 
+Similarly, in computer displays, air-traffic control and roadsides, much infrastructure is based on the idea that we can control attention and redirect it to change how people make decisions. 
+Despite this ubiquity, we are still not certain how attention affects the mechanisms of value-based choices. 
+
+Speaking to this uncertainty, there are several formal models of decision making that have attempted to include attention in the decision making mechanism. 
+For instance, in the attentional drift diffusion model \cite<aDDM;>{Krajbich2010}, attention is hypothesised to exaggerate the difference in value between the two options. 
+Briefly, the aDDM assumes a drift diffusion process where evidence is accumulated over time. 
+Once the evidence hits a boundary, a choice is initiated. 
+Attention in this model changes the rate at which evidence is accumulated. 
+For instance, let us assume a choice between two options: `Left' and `Right.'
+If the participant is gazing at the left option, the change in the drift rate is defined as $\Delta_V \propto V_\text{left} - \theta V_\text{right}$ where $\Delta_V$ is the change in drift rate, $V_i$ is the value of option $i$ and $\theta$ is a parameter between 0 and 1 that reflects the bias towards the fixated option. 
+Similarly, if the participant is gazing at the right option, the change in drift is given as $\Delta_V \propto \theta V_\text{left} - V_\text{right}$. 
+
+Thus, in this model, attention has a multiplicative effect on value. 
+In other words, it moderates the drift rate depending on the value difference. 
+The larger the value difference, the more attention will speed the drift rate. 
+This is great, as it predicts many effects in the literature. 
+For instance, this predicts that the higher the total value of the choice, the faster the choice should be made \cite{Smith2019}.
+
+Similarly, in our lab we have also found some evidence that attention has a multiplicative effect.  
+Mainly, in complex multi-attribute choice tasks. 
+For instance, in one experiment participants had to choose between two apartments. 
+These choices were laid out in an attribute list. 
+In this experiment, there was an interaction effect at the level of the individual attributes values, not at the level of the overall item values. 
+Similar effects were found in tasks asking about EQ5D health outcome choices, binary social dilemma choices, and (more weakly) in risky gamble choices. 
+
+However, other models predict that attention should have an additive effect. 
+
+We have found this to be the case in simple choices between pairs of foods, pictures, or pictures of politicians. 
+The effect of attention shows no interaction with the value of the item being attended. 
+Perhaps you might argue that these tasks are so different this is to be expected. 
+After all, in the later tasks, the information is integrated in a single image whereas in the earlier tasks it was spaced out by attribute. 
+However, in another experiment participants were asked to choose between two lotteries each consisting of three, equally likely tickets. 
+This experiment had a layout much more similar to the multi-attribute choice tasks: the information of each option was spaced out across the screen. 
+In this data, there was no interaction effect at the level of the attributes (when assuming screen position defines attributes). 
+
+These results initially led us to question whether it is the specific simplicity of those binary choice tasks which results in no interaction effect. 
+Although the lottery experiment also showed no interaction effect, it was the only multi-attribute task where the outcomes were completely identical and simply interpretable. 
+The choices had the same numeric scale (unlike e.g. apartment choices), the same attribute scale as all were financial payouts (unlike e.g. health choices) and referred to equally likely single outcomes with no associated consequences or information which had to be integrated from other visual locations (e.g. the associated payout for self vs. other in social dilemma choice).
+
+One possible explanation is that in simple binary choice, one often only need assess the two options with very rough accuracy to determine which is better. 
+Thus, if one were forced to make a more specific judgement about the degree or strength of relative preference then this makes the task more complex. 
+Similarly to the EQ5D experiments where valuation requires processing of all the information. 
+This additional depth of processing may result in an interaction becoming evident. 
+This would be a significant advance as it shows that attention has qualitatively different impacts in different tasks, or the interaction effect is only present when depth of processing requirements are high. 
+This is why we ran Experiment 1. 
+
+In Experiment 1, we attempted to manipulate depth of processing by changing the response options. 
+In one condition, as in the previous experiments, participants had to simply choose their preferred option. 
+In the other condition, participants had to try to judge not only which one they preferred but by how much. 
+By extending the responses, we hoped to tap into the same processes that might happen in the more complex multi-attribute choices where you have to more closely estimate the difference in value in order to make your choice. 
+This did not work. 
+
+
+%Furthermore, in the EQ5D experiments, there were interesting patterns in attention itself. More attention was given to attributes that had a greater weighting in behavioural responses overall, and more severe (higher value) information was attended to for longer. However, this effect was weak overall, becoming stronger when one controlled for the fact that many choices were dominated, or particularly easy. On many trials, a decision was made before all information had been attended even once, meaning there was little possibility for ever identifying any interaction effect. In the valuation task, there was a noticeably stronger correlation between attention and attribute weighting, and rating severity. Here, the more complex task inherently required participants to consider and integrate all attributes to be able to form a specific rating. 
+
 \section{Experiment 1} \label{exp:NS01} 
 \subsection{Method}
 \subsubsection{Participants}
@@ -88,9 +145,20 @@ To look for order effects, we looked at the general linear model that predicts c
 
 \input{tables/NS01choiceModel.tex}
 
-\subsubsection{Predicting reaction times}
+\section{Discussion}
+
 
 \section{Experiment 2} \label{exp:NS07}
+Another possibility is that a primary role of attention is to weight different pieces of information when they cannot be thought about or conceived of simultaneously. 
+This would explain why we find the interaction effect in the complex multi-attribute choice tasks, where the different attributes cannot be thought about on the same subjective scale (e.g. pain vs depression in EQ5D, or crime safety vs commute time in apartment choice). 
+It would also explain why there is no interaction in the Nikhil data (everything on the same scale), or the simple binary choices. 
+Therefore, in Experiment 2 we examined whether there is an interaction effect at the attribute level for a task where the attributes are non-commensurate (i.e. they cannot be easily thought of on the same scale), but not when they are commensurate. 
+% ^ Terrible sentence, fix. 
+This would be a significant advance as it would be a major component of explaining how different information is weighted and integrated during complex choice. 
+It would also feed into many existing behavioural models that contain an “attention” component, that has never been tested against any actual attention data. 
+The results from Experiment 2 experiment show that there is no interaction effect in either condition at the level of the item value. 
+We should further develop the analysis to examine whether the interaction effect is present at the attribute level.
+	
 \subsubsection{Participants}
 Data was collected from $x$ participants: $y$ of these were excluded because the eye-tracker would not initially calibrate. This resulted in data being collected from $z$ participants. All participants were recruited from the University of Warwick's volunteer subject pool. Participants were paid a show up fee of \pounds 5. Additionally, one trial was randomly selected and then played out, so the participant could win an additional \pounds 1 to \pounds 8 depending on their choices. 
 
@@ -127,9 +195,7 @@ Areas of interest were defined as the area of the stimulus, allowing for fixatio
 
 \subsubsection{Predicting choice}
 
-
-
-\section{Discussion}
+\section{General Discussion}
 This is a lengthy and erudite discussion.  It demonstrates amazing
 skill in interpreting the results for the masses.
 
