@@ -7,6 +7,7 @@ require(data.table)
 combine=F
 exclusions=T
 
+# Data preprocessing -------------------------------------------------------------------------------
 if (combine){
   # Getting eye-tracking files ---------------------------------------------------------------------
   filenames <- list.files(path = "../data/fixations", full.names=T)

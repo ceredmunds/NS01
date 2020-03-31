@@ -3,7 +3,7 @@
 ## Setup -------------------------------------------------------------------------------------------
 rm(list=ls())
 
-require(data.table); require(lme4); require(emmeans);
+require(data.table); require(lme4); require(emmeans); require(nlme);
 require(ggplot2); require(wesanderson); require(stargazer); require(GGally);
 
 # require(plyr);  require(MuMIn); 
@@ -41,7 +41,7 @@ data <- data[!(is.na(propAttentionLeft) & task!="valuation"),] # Remove one odd 
 ## Reaction times ----------------------------------------------------------------------------------
 data[, abs.value.diff:= abs(value.difference)]
 data[, abs.attention.diff:= abs(propAttentionLeft-0.5)]
-data[, abs.interaction:= abs(Timintr)]
+data[, abs.interaction:= abs(interaction)]
 
 # Order effects
 rt.order <- lm(rt ~ task*taskOrder, data=data[task!="valuation",])
@@ -99,8 +99,8 @@ anova(rt.random.intercept.only, rt.intercept.only, rt.random.intercept.slope.att
       rt.random.intercept.slope.att.val)
 
 # Full model (i.e. including fixed effects)
-rt.full <- lmer(rt ~ task + abs.attention.diff + abs.value.diff + Timintr +
-                  task:abs.attention.diff + task:abs.value.diff + task:Timintr + 
+rt.full <- lmer(rt ~ task + abs.attention.diff + abs.value.diff + interaction +
+                  task:abs.attention.diff + task:abs.value.diff + task:interaction + 
                   task:abs.attention.diff:abs.value.diff + 
                   (abs.attention.diff + abs.value.diff||participantNo),
                 data=data[task!="valuation",], 
@@ -330,24 +330,24 @@ stargazer(choice.full.block2, type="latex",
 
 # Choice: by task ----------------------------------------------------------------------------------
 # Continuous
-evaluation.continuous <- lmer(response ~ propAttentionLeft + value.difference + Timintr + 
+evaluation.continuous <- lmer(response ~ propAttentionLeft + value.difference + interaction + 
                                 (value.difference ||participantNo),
                               data=data[task=="continuous",])
 summary(evaluation.continuous)
 confint(evaluation.continuous)
 
-evaluation.binary <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr +
+evaluation.binary <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction +
                              (1 + value.difference ||participantNo), family="binomial",
                            data=data[task=="continuous",])
 summary(evaluation.binary)
 
-choice.binary <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr +
+choice.binary <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction +
                          (1 + value.difference ||participantNo), family="binomial",
                        data=data[task=="binary",])
 summary(choice.binary)
 
-choice <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr + task +
-                  propAttentionLeft*task + value.difference*task + Timintr*task +
+choice <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction + task +
+                  propAttentionLeft*task + value.difference*task + interaction*task +
                   (1 + value.difference ||participantNo), family="binomial",
                 data=data[task!="valuation",])
 summary(choice)
@@ -363,17 +363,17 @@ stargazer(evaluation.binary, choice.binary, type="latex",
           notes.append=F, notes.align="l") # Print table to file
 
 # Just first block 
-valuation.continuous.block1 <- lmer(response ~ propAttentionLeft + value.difference + Timintr + 
+valuation.continuous.block1 <- lmer(response ~ propAttentionLeft + value.difference + interaction + 
                                (1 + value.difference ||participantNo),
                              data=data[task=="continuous" & block==1,])
 summary(valuation.continuous.block1)
 
-evaluation.binary.block1 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr +
+evaluation.binary.block1 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction +
                              (1 + value.difference ||participantNo), family="binomial",
                            data=data[task=="continuous" & block==1,])
 summary(evaluation.binary.block1)
 
-choice.binary.block1 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr +
+choice.binary.block1 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction +
                          (1 + value.difference ||participantNo), family="binomial",
                        data=data[task=="binary" & block==1,])
 summary(choice.binary.block1)
@@ -395,23 +395,23 @@ stargazer(evaluation.binary.block1, choice.binary.block1, type="latex",
           notes.append=F, notes.align="l") # Print table to file
 
 # Just second block 
-valuation.continuous.block2 <- lmer(response ~ propAttentionRight + value.difference + Timintr + 
+valuation.continuous.block2 <- lmer(response ~ propAttentionRight + value.difference + interaction + 
                                       (1 + value.difference ||participantNo),
                                     data=data[task=="continuous" & block==2,])
 summary(valuation.continuous.block2)
 
-evaluation.binary.block2 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr +
+evaluation.binary.block2 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction +
                                     (1 + value.difference ||participantNo), family="binomial",
                                   data=data[task=="continuous" & block==2,])
 summary(evaluation.binary.block2)
 
-choice.binary.block2 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr +
+choice.binary.block2 <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction +
                                 (1 + value.difference ||participantNo), family="binomial",
                               data=data[task=="binary" & block==2,])
 summary(choice.binary.block2)
 
-choice.block2 <- glmer(recodedResponse ~ propAttentionRight + value.difference + Timintr + task +
-                         propAttentionLeft*task + value.difference*task + Timintr*task +
+choice.block2 <- glmer(recodedResponse ~ propAttentionRight + value.difference + interaction + task +
+                         propAttentionLeft*task + value.difference*task + interaction*task +
                          (1 + value.difference ||participantNo), family="binomial",
                        data=data[task!="valuation",])
 summary(choice.block2)
@@ -454,9 +454,9 @@ for (i in 1:9){
                        (scale(value.difference)||participantNo), 
                      tmp)
   } else {
-    m <- glmer(recodedResponse ~ propAttentionLeft + value.difference + Timintr + 
+    m <- glmer(recodedResponse ~ propAttentionLeft + value.difference + interaction + 
                  (value.difference ||participantNo), tmp, family="binomial", glmerControl(tol=1e-8))
-    mScaled <- glmer(recodedResponse ~ scale(propAttentionLeft) + scale(value.difference) + scale(Timintr) + 
+    mScaled <- glmer(recodedResponse ~ scale(propAttentionLeft) + scale(value.difference) + scale(interaction) + 
                        (scale(value.difference)||participantNo), 
                      tmp, family="binomial", glmerControl(tol=1e-8))
   }
@@ -466,19 +466,19 @@ for (i in 1:9){
   
   CI <- confint(m)
   models[model==i, lower:=as.double(as.list(CI[c("(Intercept)", "propAttentionLeft", 
-                                                 "value.difference", "Timintr"), 1]))]
+                                                 "value.difference", "Interaction"), 1]))]
   models[model==i, upper:=as.double(as.list(CI[c("(Intercept)", "propAttentionLeft", 
-                                                 "value.difference", "Timintr"), 2]))]
+                                                 "value.difference", "Interaction"), 2]))]
   
   CIscaled <- confint(mScaled)
   models[model==i, lowerScaled:=as.double(as.list(CIscaled[c("(Intercept)", 
                                                              "scale(propAttentionLeft)",
                                                              "scale(value.difference)", 
-                                                             "scale(Timintr)"), 1]))]
+                                                             "scale(Interaction)"), 1]))]
   models[model==i, upperScaled:=as.double(as.list(CIscaled[c("(Intercept)", 
                                                              "scale(propAttentionLeft)",
                                                              "scale(value.difference)", 
-                                                             "scale(Timintr)"), 2]))]
+                                                             "scale(Interation)"), 2]))]
 }
 
 ggplot(models, aes(x=task, y=b, fill=predictor)) +
@@ -666,79 +666,79 @@ stargazer(fix.duration.model, type="latex",
           label="table:durFixModel", table.placement="!b",
           notes.append=F, notes.align="l") # Print table to file
 
-# Looking at other metrics of attention ------------------------------------------------------------
-dcast(data[task!="valuation",], task ~ ., fun = mean, value.var="likertHorizontal.x")
-
-data[, attention:=attention.difference]
-choice.full <- glmer(recodedResponse ~ task*attention*value.difference +
-                       (1 + attention + value.difference||participantNo),
-                     data=data[task!="valuation" & block==1,], family="binomial",
-                     control=glmerControl(optimizer="Nelder_Mead",
-                                          check.conv.grad=.makeCC("warning", tol=1e-1)))
-summary(choice.full) # Model summary
-confint(choice.full, method="Wald") # Get 0.95 confidence intervals
-
-rt.full <- lmer(rt ~ task*abs(attention)*abs(value.difference) +
-                  (abs(value.difference)||participantNo),
-                data=data[task!="valuation" & block==1,],
-                control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt.full)
-
-data[, attention:=attentionByOptions]
-choice.full.options <- glmer(recodedResponse ~ task*attention*value.difference +
-                               (1 + attention + value.difference||participantNo),
-                             data=data[task!="valuation" & block==1,], family="binomial",
-                             control=glmerControl(optimizer="Nelder_Mead",
-                                                  check.conv.grad=.makeCC("warning", tol=1e-1)))
-summary(choice.full.options)
-
-rt.full.options <- lmer(rt ~ task*abs(attention)*abs(value.difference) +
-                  (abs(value.difference)||participantNo),
-                data=data[task!="valuation" & block==1,],
-                control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt.full.options)
-
-data[, attention:=attentionByTimeOnTask]
-choice.full.on.task<- glmer(recodedResponse ~ task*attention*value.difference +
-                               (1 + attention + value.difference||participantNo),
-                             data=data[task!="valuation" & block==1,], family="binomial",
-                             control=glmerControl(optimizer="Nelder_Mead",
-                                                  check.conv.grad=.makeCC("warning", tol=1e-1)))
-summary(choice.full.on.task)
-
-rt.full.on.task <- lmer(rt ~ task*abs(attention)*abs(value.difference) +
-                          (abs(value.difference)||participantNo),
-                        data=data[task!="valuation" & block==1,],
-                        control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt.full.on.task)
-
-stargazer(choice.full, choice.full.options, choice.full.on.task, type="latex",
-          title="Summary of coefficients of model predicting choice, comparing different attentions",
-          covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
-                             "Task : $\\Delta_A$", "Task : $\\Delta_V$",
-                             "$\\Delta_A$ : $\\Delta_V$",
-                             "Task : $\\Delta_A$ :  $\\Delta_V$"),
-          column.labels=c("by reaction time", "by time on choices", "by time on task"),
-          out="../techReport/tables/choiceModelAttention.tex", style="default", ci=T, single.row=F,
-          label="table:choiceModelAttention", table.placement="h",
-          notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
-          notes.append=F, notes.align="l") # Print table to file
-
-stargazer(rt.full, rt.full.options, rt.full.on.task, type="latex",
-          title="Summary of coefficients of model predicting reaction time, comparing different attentions",
-          covariate.labels=c("Task", "$\\vert\\Delta_A\\vert$", "$\\vert\\Delta_V\\vert$",
-                             "Task : $\\vert\\Delta_A\\vert$", "Task : $\\vert\\Delta_V\\vert$",
-                             "$\\vert\\Delta_A\\vert$ : $\\vert\\Delta_V\\vert$",
-                             "Task : $\\vert\\Delta_A\\vert$ :  $\\vert\\Delta_V\\vert$"),
-          column.labels=c("by reaction time", "by time on choices", "by time on task"),
-          out="../techReport/tables/rtModelAttention.tex", style="default", ci=T, single.row=F,
-          label="table:choiceModelAttention", table.placement="h",
-          notes="\\footnotesize $\\vert\\Delta_A\\vert$ = absolute attention difference; $\\vert\\Delta_V\\vert$ = absolute value difference; ",
-          notes.append=F, notes.align="l") # Print table to file
-
-ggpairs(data[task!="valuation", c("attention.difference", "attentionByOptions", "attentionByTimeOnTask")],
-        title="Correlations between attentions.")
-ggsave('../techReport/images/attentionCorrelations.pdf', height=5, width=5, units="in")
+# # Looking at other metrics of attention ------------------------------------------------------------
+# dcast(data[task!="valuation",], task ~ ., fun = mean, value.var="likertHorizontal.x")
+# 
+# data[, attention:=attention.difference]
+# choice.full <- glmer(recodedResponse ~ task*attention*value.difference +
+#                        (1 + attention + value.difference||participantNo),
+#                      data=data[task!="valuation" & block==1,], family="binomial",
+#                      control=glmerControl(optimizer="Nelder_Mead",
+#                                           check.conv.grad=.makeCC("warning", tol=1e-1)))
+# summary(choice.full) # Model summary
+# confint(choice.full, method="Wald") # Get 0.95 confidence intervals
+# 
+# rt.full <- lmer(rt ~ task*abs(attention)*abs(value.difference) +
+#                   (abs(value.difference)||participantNo),
+#                 data=data[task!="valuation" & block==1,],
+#                 control=lmerControl(optimizer="Nelder_Mead"))
+# summary(rt.full)
+# 
+# data[, attention:=attentionByOptions]
+# choice.full.options <- glmer(recodedResponse ~ task*attention*value.difference +
+#                                (1 + attention + value.difference||participantNo),
+#                              data=data[task!="valuation" & block==1,], family="binomial",
+#                              control=glmerControl(optimizer="Nelder_Mead",
+#                                                   check.conv.grad=.makeCC("warning", tol=1e-1)))
+# summary(choice.full.options)
+# 
+# rt.full.options <- lmer(rt ~ task*abs(attention)*abs(value.difference) +
+#                   (abs(value.difference)||participantNo),
+#                 data=data[task!="valuation" & block==1,],
+#                 control=lmerControl(optimizer="Nelder_Mead"))
+# summary(rt.full.options)
+# 
+# data[, attention:=attentionByTimeOnTask]
+# choice.full.on.task<- glmer(recodedResponse ~ task*attention*value.difference +
+#                                (1 + attention + value.difference||participantNo),
+#                              data=data[task!="valuation" & block==1,], family="binomial",
+#                              control=glmerControl(optimizer="Nelder_Mead",
+#                                                   check.conv.grad=.makeCC("warning", tol=1e-1)))
+# summary(choice.full.on.task)
+# 
+# rt.full.on.task <- lmer(rt ~ task*abs(attention)*abs(value.difference) +
+#                           (abs(value.difference)||participantNo),
+#                         data=data[task!="valuation" & block==1,],
+#                         control=lmerControl(optimizer="Nelder_Mead"))
+# summary(rt.full.on.task)
+# 
+# stargazer(choice.full, choice.full.options, choice.full.on.task, type="latex",
+#           title="Summary of coefficients of model predicting choice, comparing different attentions",
+#           covariate.labels=c("Task", "$\\Delta_A$", "$\\Delta_V$",
+#                              "Task : $\\Delta_A$", "Task : $\\Delta_V$",
+#                              "$\\Delta_A$ : $\\Delta_V$",
+#                              "Task : $\\Delta_A$ :  $\\Delta_V$"),
+#           column.labels=c("by reaction time", "by time on choices", "by time on task"),
+#           out="../techReport/tables/choiceModelAttention.tex", style="default", ci=T, single.row=F,
+#           label="table:choiceModelAttention", table.placement="h",
+#           notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
+#           notes.append=F, notes.align="l") # Print table to file
+# 
+# stargazer(rt.full, rt.full.options, rt.full.on.task, type="latex",
+#           title="Summary of coefficients of model predicting reaction time, comparing different attentions",
+#           covariate.labels=c("Task", "$\\vert\\Delta_A\\vert$", "$\\vert\\Delta_V\\vert$",
+#                              "Task : $\\vert\\Delta_A\\vert$", "Task : $\\vert\\Delta_V\\vert$",
+#                              "$\\vert\\Delta_A\\vert$ : $\\vert\\Delta_V\\vert$",
+#                              "Task : $\\vert\\Delta_A\\vert$ :  $\\vert\\Delta_V\\vert$"),
+#           column.labels=c("by reaction time", "by time on choices", "by time on task"),
+#           out="../techReport/tables/rtModelAttention.tex", style="default", ci=T, single.row=F,
+#           label="table:choiceModelAttention", table.placement="h",
+#           notes="\\footnotesize $\\vert\\Delta_A\\vert$ = absolute attention difference; $\\vert\\Delta_V\\vert$ = absolute value difference; ",
+#           notes.append=F, notes.align="l") # Print table to file
+# 
+# ggpairs(data[task!="valuation", c("attention.difference", "attentionByOptions", "attentionByTimeOnTask")],
+#         title="Correlations between attentions.")
+# ggsave('../techReport/images/attentionCorrelations.pdf', height=5, width=5, units="in")
 
 # Run with all fixations ---------------------------------------------------------------------------
 # Setup
@@ -817,69 +817,69 @@ stargazer(choice.full, type="latex",
           notes="\\footnotesize $\\Delta_A$ = attention difference; $\\Delta_V$ = value difference; ",
           notes.append=F, notes.align="l") # Print table to file
 
-# Overall choice value -----------------------------------------------------------------------------
-# Setup
-rm(list=ls())
-
-require(data.table); require(plyr); require(ggplot2); require(MuMIn);
-require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4)
-
-require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
-
-source("Preprocessing.R"); source('bsci.R')
-
-# Remove fixations outside of trial
-fixations <- fixations[intra_choice==1,]
-# Remove excluded trials
-fixations <- fixations[exclude==0,]
-
-# Get by trial data
-data <- dcast(fixations, participantNo + task + taskOrder + block + trial + response + rt +
-                lValue + rValue ~ aoi,
-              fun = sum, value.var="fixLengthProp")
-
-data[, value.difference:=rValue-lValue]
-data[, total.value:=rValue+lValue]
-data[, attention.difference:=right-left]
-
-# Different types of attention
-data[, attentionByOptions:=(right-left)/(right+left)]
-data[, attentionByTimeOnTask:=(right-left)/(right+left+likertHorizontal)]
-
-# Recode responses to get binary responses from continuous task
-data[, recodedResponse:= response]
-data[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
-
-data[, `:=`(participantNo=factor(participantNo), task=factor(task))]
-
-# Looking at choice value predicting RT - model taken from Smith & Krajbich (2018)
-rt.smith <- lm(rt ~ abs(value.difference) + total.value,
-                        data=data[task!="valuation" & block==1,],
-                        control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt.smith)
-
-# Including task
-rt.smith.task <- lm(rt ~ task*total.value*abs(value.difference),
-                data=data[task!="valuation" & block==1,],
-                control=lmerControl(optimizer="Nelder_Mead"))
-summary(rt.smith.task)
-stargazer(rt.smith.task, type="latex",
-          title="Summary of coefficients of model predicting reaction time from total value and value difference",
-          covariate.labels=c("Task", "$\\sum_A$", "$\\Delta_V$",
-                             "Task : $\\sum_A$", "Task : $\\Delta_V$",
-                             "$\\sum_A$ : $\\Delta_V$",
-                             "Task : $\\sum_A$ :  $\\Delta_V$"),
-          out="../techReport/tables/rtModelSmithTask.tex", style="default", ci=T, single.row=T,
-          label="table:rtModelSmithTask", table.placement="!b",
-          notes="\\footnotesize $\\sum_A$ = total value; $\\Delta_V$ = value difference; ",
-          notes.append=F, notes.align="l") # Print table to file
-
-
-rt.smith.cont <- lm(rt ~ total.value*abs(value.difference),
-               data=data[task=="continuous" & block==1,])
-summary(rt.smith.cont)
-
-rt.smith.binary <- lm(rt ~ total.value*abs(value.difference),
-                    data=data[task=="binary" & block==1,])
-summary(rt.smith.binary)
-confint(rt.smith.binary)
+# # Overall choice value -----------------------------------------------------------------------------
+# # Setup
+# rm(list=ls())
+# 
+# require(data.table); require(plyr); require(ggplot2); require(MuMIn);
+# require(GGally); require(stargazer); require(BaylorEdPsych); require(lme4)
+# 
+# require(RePsychLing) # install.packages('devtools'); devtools::install_github("dmbates/RePsychLing")
+# 
+# source("Preprocessing.R"); source('bsci.R')
+# 
+# # Remove fixations outside of trial
+# fixations <- fixations[intra_choice==1,]
+# # Remove excluded trials
+# fixations <- fixations[exclude==0,]
+# 
+# # Get by trial data
+# data <- dcast(fixations, participantNo + task + taskOrder + block + trial + response + rt +
+#                 lValue + rValue ~ aoi,
+#               fun = sum, value.var="fixLengthProp")
+# 
+# data[, value.difference:=rValue-lValue]
+# data[, total.value:=rValue+lValue]
+# data[, attention.difference:=right-left]
+# 
+# # Different types of attention
+# data[, attentionByOptions:=(right-left)/(right+left)]
+# data[, attentionByTimeOnTask:=(right-left)/(right+left+likertHorizontal)]
+# 
+# # Recode responses to get binary responses from continuous task
+# data[, recodedResponse:= response]
+# data[task=="continuous", recodedResponse:= ifelse(recodedResponse<=0.5, 0, 1)]
+# 
+# data[, `:=`(participantNo=factor(participantNo), task=factor(task))]
+# 
+# # Looking at choice value predicting RT - model taken from Smith & Krajbich (2018)
+# rt.smith <- lm(rt ~ abs(value.difference) + total.value,
+#                         data=data[task!="valuation" & block==1,],
+#                         control=lmerControl(optimizer="Nelder_Mead"))
+# summary(rt.smith)
+# 
+# # Including task
+# rt.smith.task <- lm(rt ~ task*total.value*abs(value.difference),
+#                 data=data[task!="valuation" & block==1,],
+#                 control=lmerControl(optimizer="Nelder_Mead"))
+# summary(rt.smith.task)
+# stargazer(rt.smith.task, type="latex",
+#           title="Summary of coefficients of model predicting reaction time from total value and value difference",
+#           covariate.labels=c("Task", "$\\sum_A$", "$\\Delta_V$",
+#                              "Task : $\\sum_A$", "Task : $\\Delta_V$",
+#                              "$\\sum_A$ : $\\Delta_V$",
+#                              "Task : $\\sum_A$ :  $\\Delta_V$"),
+#           out="../techReport/tables/rtModelSmithTask.tex", style="default", ci=T, single.row=T,
+#           label="table:rtModelSmithTask", table.placement="!b",
+#           notes="\\footnotesize $\\sum_A$ = total value; $\\Delta_V$ = value difference; ",
+#           notes.append=F, notes.align="l") # Print table to file
+# 
+# 
+# rt.smith.cont <- lm(rt ~ total.value*abs(value.difference),
+#                data=data[task=="continuous" & block==1,])
+# summary(rt.smith.cont)
+# 
+# rt.smith.binary <- lm(rt ~ total.value*abs(value.difference),
+#                     data=data[task=="binary" & block==1,])
+# summary(rt.smith.binary)
+# confint(rt.smith.binary)
