@@ -26,32 +26,45 @@
 \begin{document}
 \maketitle
 
+Attention is important in value-based choice. 
+If you doubt that consider the world around you.
+From advertising, through roadside signs, to computer and air-traffic control displays: they are all designed to manipulate an individual's pattern of visual attention. 
+Further, by changing attention, the designers of these objects are hoping to change the choices people making. 
+To choose this route, rather than that one. 
+To buy this, rather than that.
+Stop here, not there.
+By and large, these every day manipulations are (at least somewhat) successful. 
+However, despite their success, researchers still do not have a complete understanding of the mechanism by which attention affects choice. 
 
-It seems obvious that attention is important in value-based choice; after all, it seems as if the entire premise of advertising is set up to grab attention and keep it focused on the positives, and away from the negatives. 
-Similarly, in computer displays, air-traffic control and roadsides, much infrastructure is based on the idea that we can control attention and redirect it to change how people make decisions. 
-Despite this ubiquity, we are still not certain how attention affects the mechanisms of value-based choices. 
-
-Speaking to this uncertainty, there are several formal models of decision making that have attempted to include attention in the decision making mechanism. 
-For instance, in the attentional drift diffusion model \cite<aDDM;>{Krajbich2010}, attention is hypothesised to exaggerate the difference in value between the two options. 
-Briefly, the aDDM assumes a drift diffusion process where evidence is accumulated over time. 
-Once the evidence hits a boundary, a choice is initiated. 
-Attention in this model changes the rate at which evidence is accumulated. 
+That is not to say that researchers do not have ideas. 
+There are several formal models of decision making that include attention in the decisions making mechanism. 
+One approach to combining attention with decision making is illustrated in the attentional drift diffusion model \cite<aDDM;>{Krajbich2010}.
+Broadly speaking, in this model, attention is hypothesised to exaggerate the difference in value between the options. 
+More specifically, the aDDM assumes decisions are made through a drift diffusion process where evidence is accumulated over time. 
+Evidence accumulates until it hits a boundary, at which point a choice is initiated. 
+Attention changes the rate at which evidence is accumulated. 
+Mathematically, this is achieved by weighting value of the option currently being gazed at
 For instance, let us assume a choice between two options: `Left' and `Right.'
-If the participant is gazing at the left option, the change in the drift rate is defined as $\Delta_V \propto V_\text{left} - \theta V_\text{right}$ where $\Delta_V$ is the change in drift rate, $V_i$ is the value of option $i$ and $\theta$ is a parameter between 0 and 1 that reflects the bias towards the fixated option. 
-Similarly, if the participant is gazing at the right option, the change in drift is given as $\Delta_V \propto \theta V_\text{left} - V_\text{right}$. 
+Then, whilst the participant is gazing at the left option, the drift rate $v$ is defined as 
+\begin{equation}
+	v \propto V_\text{left} - \theta V_\text{right}
+\end{equation}
+where $V_i$ is the value of option $i$ and $\theta$ is a parameter between zero and one that reflects the biased towards the currently fixated option. 
+Similarly, if the participant is gazing at the right option, the change in drift is given by
+\begin{equation}
+	v \propto \theta V_\text{left} - V_\text{right}.
+\end{equation}
+In summary, the aDDM assumes that attention has a multiplicative effect on value. 
 
-Thus, in this model, attention has a multiplicative effect on value. 
-In other words, it moderates the drift rate depending on the value difference. 
-The larger the value difference, the more attention will speed the drift rate. 
-This is great, as it predicts many effects in the literature. 
-For instance, this predicts that the higher the total value of the choice, the faster the choice should be made \cite{Smith2019}.
+Including attention in this manner successfully predicts choices and reaction times in many tasks. 
+For instance, it predicts that the higher the total value of the choice, the faster the choice will be made \cite{Smith2019}.
+In our lab, we have found a multiplicative effect of attention on choices between apartments \cite{MullettStewartCamerer19}. 
+In these experiments, participants had to choose between two options, each option displayed as an attribute grid. 
+In this experiment, there were indeed interactions between value and attention at the level of the individual attribute values. 
+This interaction was not found at the overall option level. 
+Similar effects were found in tasks asking about EQ5D health outcome choices, binary social dilemma choices, and (more weakly) in risky gamble choices \cite{MullettRavichandar}. 
 
-Similarly, in our lab we have also found some evidence that attention has a multiplicative effect.  
-Mainly, in complex multi-attribute choice tasks. 
-For instance, in one experiment participants had to choose between two apartments. 
-These choices were laid out in an attribute list. 
-In this experiment, there was an interaction effect at the level of the individual attributes values, not at the level of the overall item values. 
-Similar effects were found in tasks asking about EQ5D health outcome choices, binary social dilemma choices, and (more weakly) in risky gamble choices. 
+
 
 However, other models predict that attention should have an additive effect. 
 
